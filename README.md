@@ -1,7 +1,8 @@
-#product-junpro
-pawang hujan
+# NADI (Nusantara Climate Data & Insight)  
 
-NAMA KELOMPOK ANDA
-Ketua Kelompok: Muhammad Zakiyyuddin Abdul Adhiim 
-Anggota 1: Dharu Bintang Mahendratama
-Anggota 2: Razaqi Alkautsar
+NADI adalah aplikasi desktop yang membantu masyarakat memahami kondisi dan perubahan iklim di Indonesia melalui data visual, grafik, serta penjelasan yang mudah dipahami. Aplikasi ini terinspirasi dari proyek open-source ClimateExplorer, tetapi dikembangkan dengan fokus pada wilayah Indonesia dan aspek Climate Action.
+
+**KELOMPOK 4**  
+Ketua Kelompok: Muhammad Zakiyyuddin Abdul Adhiim   
+Anggota 1: Dharu Bintang Mahendratama  
+Anggota 2: Razaqi Alkautsar  
