@@ -5,4 +5,4 @@ NADI adalah aplikasi desktop yang membantu masyarakat memahami kondisi dan perub
 **KELOMPOK 4**  
 Ketua Kelompok: Muhammad Zakiyyuddin Abdul Adhiim - 24/545668/TK/60719  
 Anggota 1: Dharu Bintang Mahendratama - 24/535960/TK/59484   
-Anggota 2: Razaqi Alkautsar  
+Anggota 2: Razaqi Alkautsar - 24/544958/TK/60570
