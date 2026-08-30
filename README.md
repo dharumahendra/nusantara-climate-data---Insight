@@ -1,4 +1,4 @@
-# NADI (Nusantara Climate Data & Insight)  
+# NADI (Nusantara Climate Data & Insight)
 
 NADI adalah aplikasi desktop yang membantu masyarakat memahami kondisi dan perubahan iklim di Indonesia melalui data visual, grafik, serta penjelasan yang mudah dipahami. Aplikasi ini terinspirasi dari proyek open-source ClimateExplorer, tetapi dikembangkan dengan fokus pada wilayah Indonesia dan aspek Climate Action.
 
