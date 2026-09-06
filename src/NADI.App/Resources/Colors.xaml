@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Palet Minimalist Earth Tone Dashboard (PRD §13) -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#452829" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#57595B" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#E8D1C5" />
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#F3E8DF" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#4A6B4A" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#B5722F" />
+    <SolidColorBrush x:Key="MutedBrush" Color="#9A9086" />
+
+</ResourceDictionary>
