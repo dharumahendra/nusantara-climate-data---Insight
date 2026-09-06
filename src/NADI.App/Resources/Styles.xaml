@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Gaya tipografi & kontrol bersama (PRD §13) ditambahkan bertahap.
+         Font Poppins/Inter wajib di-embed sebagai resource sebelum dipakai di sini. -->
+
+</ResourceDictionary>

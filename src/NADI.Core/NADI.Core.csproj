@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NADI.Core</RootNamespace>
+  </PropertyGroup>
+
+  <!-- NADI.Core tidak boleh mereferensikan project lain (lihat PRD §7) -->
+
+</Project>

@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+out/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# Rahasia lokal (PRD §11.5) — jangan pernah commit API key
+appsettings.local.json
+
+# Database lokal
+*.db
+*.db-shm
+*.db-wal
+
+# Log aplikasi
+logs/
