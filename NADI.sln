@@ -1,0 +1,46 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NADI.Core", "src\NADI.Core\NADI.Core.csproj", "{948C9644-9D50-4663-965D-3367C0AD8CDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NADI.Infrastructure", "src\NADI.Infrastructure\NADI.Infrastructure.csproj", "{4DB9D31D-1FE0-4A55-9BC6-C5AD5C990ED3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NADI.AI", "src\NADI.AI\NADI.AI.csproj", "{5B416BA1-3DB5-4180-ADAE-4DBEE52F945C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NADI.App", "src\NADI.App\NADI.App.csproj", "{EE8E5420-6442-4317-9945-437938762D48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NADI.Tests", "tests\NADI.Tests\NADI.Tests.csproj", "{441D34C1-E542-4451-8BE2-5F3BCC33C5D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{948C9644-9D50-4663-965D-3367C0AD8CDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{948C9644-9D50-4663-965D-3367C0AD8CDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{948C9644-9D50-4663-965D-3367C0AD8CDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{948C9644-9D50-4663-965D-3367C0AD8CDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DB9D31D-1FE0-4A55-9BC6-C5AD5C990ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DB9D31D-1FE0-4A55-9BC6-C5AD5C990ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DB9D31D-1FE0-4A55-9BC6-C5AD5C990ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DB9D31D-1FE0-4A55-9BC6-C5AD5C990ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B416BA1-3DB5-4180-ADAE-4DBEE52F945C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B416BA1-3DB5-4180-ADAE-4DBEE52F945C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B416BA1-3DB5-4180-ADAE-4DBEE52F945C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B416BA1-3DB5-4180-ADAE-4DBEE52F945C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE8E5420-6442-4317-9945-437938762D48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE8E5420-6442-4317-9945-437938762D48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE8E5420-6442-4317-9945-437938762D48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE8E5420-6442-4317-9945-437938762D48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{441D34C1-E542-4451-8BE2-5F3BCC33C5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{441D34C1-E542-4451-8BE2-5F3BCC33C5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{441D34C1-E542-4451-8BE2-5F3BCC33C5D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{441D34C1-E542-4451-8BE2-5F3BCC33C5D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
