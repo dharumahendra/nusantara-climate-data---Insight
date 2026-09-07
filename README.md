@@ -46,6 +46,12 @@ NADI/
 
 Aturan ketergantungan antar-project mengikuti `NADI.App / NADI.Infrastructure / NADI.AI → NADI.Core` (lihat PRD §7). Detail lengkap struktur ada di PRD §14.
 
+## Class Diagram
+
+Berikut adalah arsitektur interaksi data dan relasi kelas dalam NADI:
+<img width="8191" height="4813" alt="Climate Data Interaction-2026-08-31-074746" src="https://github.com/user-attachments/assets/d2257901-50bd-4785-88e3-152257273907" />
+
+
 ## Prasyarat
 
 - Windows 10/11
