@@ -1,0 +1,17 @@
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\Database\Seed\regions.json
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\NADI.Infrastructure.deps.json
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\NADI.Infrastructure.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\NADI.Infrastructure.pdb
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\NADI.Core.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\NADI.Core.pdb
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.csproj.AssemblyReference.cache
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.AssemblyInfoInputs.cache
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.AssemblyInfo.cs
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.csproj.CoreCompileInputs.cache
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.sourcelink.json
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Inf.1A475415.Up2Date
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\refint\NADI.Infrastructure.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.pdb
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\ref\NADI.Infrastructure.dll

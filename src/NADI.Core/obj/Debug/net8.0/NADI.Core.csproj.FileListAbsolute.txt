@@ -1,0 +1,12 @@
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\bin\Debug\net8.0\NADI.Core.deps.json
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\bin\Debug\net8.0\NADI.Core.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\bin\Debug\net8.0\NADI.Core.pdb
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.AssemblyInfoInputs.cache
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.AssemblyInfo.cs
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.csproj.CoreCompileInputs.cache
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.sourcelink.json
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\refint\NADI.Core.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\NADI.Core.pdb
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Core\obj\Debug\net8.0\ref\NADI.Core.dll
