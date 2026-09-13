@@ -14,6 +14,9 @@ public class ClimateData
     public int RegionId { get; set; }
     public Region? Region { get; set; }
 
+    public int? SourceId { get; set; }
+    public ClimateDataSource? Source { get; set; }
+
     public double CalculateAverage()
     {
         return (MinTemperature + MaxTemperature) / 2.0;

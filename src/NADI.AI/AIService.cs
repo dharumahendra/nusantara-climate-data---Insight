@@ -3,14 +3,14 @@ using NADI.Core.Models;
 
 namespace NADI.AI;
 
-public class GeminiClient : IAiService
+public class AIService : IAiService
 {
     private readonly HttpClient _httpClient;
 
     public string ApiKey { get; set; } = string.Empty;
     public string ModelName { get; set; } = "gemini-pro";
 
-    public GeminiClient(HttpClient httpClient)
+    public AIService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }

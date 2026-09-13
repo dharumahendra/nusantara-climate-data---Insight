@@ -3,11 +3,11 @@ using NADI.Core.Models;
 
 namespace NADI.Core.Services;
 
-public class ClimateAnalysisService : IClimateService
+public class ClimateService : IClimateService
 {
     private readonly IClimateRepository _repository;
 
-    public ClimateAnalysisService(IClimateRepository repository)
+    public ClimateService(IClimateRepository repository)
     {
         _repository = repository;
     }

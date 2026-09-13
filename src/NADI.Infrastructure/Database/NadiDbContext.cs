@@ -16,6 +16,7 @@ public class NadiDbContext : DbContext
     public DbSet<ClimateActionRecommendation> ClimateActionRecommendations { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<ClimateChat> ClimateChats { get; set; } = null!;
+    public DbSet<ClimateDataSource> ClimateDataSources { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +36,15 @@ public class NadiDbContext : DbContext
         modelBuilder.Entity<ClimateData>(entity =>
         {
             entity.HasKey(e => e.DataId);
+            entity.HasOne(e => e.Source)
+                  .WithMany(s => s.ClimateDataRecords)
+                  .HasForeignKey(e => e.SourceId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ClimateDataSource>(entity =>
+        {
+            entity.HasKey(e => e.SourceId);
         });
 
         modelBuilder.Entity<ClimateTrend>(entity =>

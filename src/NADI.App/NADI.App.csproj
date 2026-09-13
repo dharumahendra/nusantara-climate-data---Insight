@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NADI.App</RootNamespace>
+    <ApplicationIcon></ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc2" />
+  </ItemGroup>
+
+  <!-- NADI.App tidak boleh mereferensikan Infrastructure/AI di dalam ViewModel,
+       hanya lewat interface NADI.Core/Interfaces (lihat PRD §7). Referensi
+       project di bawah ini hanya untuk composition root (App.xaml.cs). -->
+  <ItemGroup>
+    <ProjectReference Include="..\NADI.Core\NADI.Core.csproj" />
+    <ProjectReference Include="..\NADI.Infrastructure\NADI.Infrastructure.csproj" />
+    <ProjectReference Include="..\NADI.AI\NADI.AI.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NADI.AI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9634b285417ead65b6dae573d560f8a585d642f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7630eef252d2061aa7e42f904494473062331fc4")]
 [assembly: System.Reflection.AssemblyProductAttribute("NADI.AI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NADI.AI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

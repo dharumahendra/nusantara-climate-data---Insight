@@ -68,8 +68,6 @@ D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\bin\Debug\net8.0
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\bin\Debug\net8.0-windows\NADI.Infrastructure.pdb
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\bin\Debug\net8.0-windows\NADI.AI.pdb
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\NADI.App.csproj.AssemblyReference.cache
-D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Resources\Colors.baml
-D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Resources\Styles.baml
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Views\MainWindow.baml
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\App.baml
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Views\MainWindow.g.cs
