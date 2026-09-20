@@ -375,6 +375,89 @@ Cakupan minimum: ≥1 wilayah dari setiap pulau besar (Sumatera, Jawa, Kalimanta
 
 SQLite via EF Core, file `%LOCALAPPDATA%/NADI/nadi.db`. Migrasi dikelola dengan `dotnet ef migrations`.
 
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#ffffff',
+      'primaryTextColor': '#000000',
+      'primaryBorderColor': '#000000',
+      'lineColor': '#000000',
+      'secondaryColor': '#ffffff',
+      'tertiaryColor': '#ffffff',
+      'attributeBackgroundColor': '#ffffff',
+      'attributeLabelColor': '#000000'
+    }
+  }
+}%%
+
+erDiagram
+    REGIONS ||--o{ CLIMATE_DAILY_RECORDS : "punya data harian"
+    REGIONS ||--o{ CLIMATE_YEARLY_SUMMARIES : "punya ringkasan tahunan"
+    REGIONS ||--o{ CHAT_MESSAGES : "punya riwayat chat"
+
+    REGIONS {
+        int RegionId PK
+        string Province
+        string City
+        float Latitude
+        float Longitude
+        float HotDayThreshold
+    }
+
+    CLIMATE_DAILY_RECORDS {
+        int Id PK
+        int RegionId FK
+        string Date
+        float TemperatureAvg
+        float TemperatureMax
+        float TemperatureMin
+        float Rainfall
+        float Humidity
+        float WindSpeed
+    }
+
+    CLIMATE_YEARLY_SUMMARIES {
+        int Id PK
+        int RegionId FK
+        int Year
+        float TempAvg
+        float TempMax
+        float TempMin
+        float RainfallTotal
+        int RainyDays
+        int HeavyRainDays
+        int HotDays
+        int IsValidYear
+        string ComputedAt
+    }
+
+    CHAT_MESSAGES {
+        int Id PK
+        int RegionId FK
+        string Role
+        string Content
+        string Timestamp
+    }
+
+    AI_RESPONSE_CACHE {
+        int Id PK
+        string CacheKey UK
+        string ResponseText
+        string CreatedAt
+    }
+
+    RECOMMENDATIONS {
+        int Id PK
+        string TriggerCode
+        string Category
+        string Title
+        string Description
+        string ImpactLevel
+    }
+```
+
 ### `Regions`
 
 | Kolom | Tipe | Keterangan |
