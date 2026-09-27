@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <None Include="Database\Seed\regions.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Database\*.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
