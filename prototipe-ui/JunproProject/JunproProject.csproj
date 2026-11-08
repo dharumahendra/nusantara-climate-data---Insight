@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Junpro_Project</RootNamespace>
+    <AssemblyName>NADI</AssemblyName>
+    <!-- Ukuran kontrol ditulis dalam piksel 96 DPI; biarkan Windows yang
+         menskalakan di layar 125%/150% agar teks tidak terpotong. -->
+    <ApplicationHighDpiMode>DpiUnawareGdiScaled</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+</Project>
