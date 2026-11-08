@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NADI.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7630eef252d2061aa7e42f904494473062331fc4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+497ed8b2bc35d9dae08076e24428c437783bdcbc")]
 [assembly: System.Reflection.AssemblyProductAttribute("NADI.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NADI.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

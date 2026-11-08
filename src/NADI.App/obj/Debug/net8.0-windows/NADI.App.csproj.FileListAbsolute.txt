@@ -85,3 +85,7 @@ D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\NADI.App.pdb
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\NADI.App.genruntimeconfig.cache
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\ref\NADI.App.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\bin\Debug\net8.0-windows\Database\schema.sql
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\bin\Debug\net8.0-windows\Database\seed.sql
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Views\LoginWindow.baml
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.App\obj\Debug\net8.0-windows\Views\LoginWindow.g.cs

@@ -15,3 +15,5 @@ D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\D
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\refint\NADI.Infrastructure.dll
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\NADI.Infrastructure.pdb
 D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\obj\Debug\net8.0\ref\NADI.Infrastructure.dll
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\Database\schema.sql
+D:\Junior Project\nusantara-climate-data---Insight\src\NADI.Infrastructure\bin\Debug\net8.0\Database\seed.sql
