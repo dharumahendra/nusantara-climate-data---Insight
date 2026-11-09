@@ -72,8 +72,10 @@ public static class DataIklim
     public const int TahunAwal = 1995;
     public const int TahunAkhir = 2024;
 
-    // Minimal satu wilayah dari tiap pulau besar agar perbandingan bermakna (PRD §8.4).
-    public static readonly Wilayah[] SemuaWilayah =
+    // Daftar bawaan, dipakai bila database PostgreSQL tidak tersedia. Isinya
+    // sama dengan data awal di Database/schema.sql. Minimal satu wilayah dari
+    // tiap pulau besar agar perbandingan bermakna (PRD §8.4).
+    private static readonly Wilayah[] wilayahBawaan =
     {
         new("DI Yogyakarta", "Kota Yogyakarta", 26.8, 2100),
         new("DI Yogyakarta", "Sleman", 26.3, 2400),
@@ -100,6 +102,15 @@ public static class DataIklim
     };
 
     private static readonly Dictionary<Wilayah, ProfilIklim> tersimpan = new();
+
+    public static Wilayah[] SemuaWilayah { get; private set; } = wilayahBawaan;
+
+    // Dipanggil saat start-up bila daftar wilayah berhasil dibaca dari database.
+    public static void GunakanDaftarWilayah(Wilayah[] daftar)
+    {
+        SemuaWilayah = daftar;
+        tersimpan.Clear();
+    }
 
     public static IEnumerable<string> DaftarProvinsi() =>
         SemuaWilayah.Select(w => w.Provinsi).Distinct();

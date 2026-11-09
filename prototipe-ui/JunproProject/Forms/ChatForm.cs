@@ -126,7 +126,7 @@ public sealed class ChatForm : FormDasar
     {
         if (areaChat == null) return;
 
-        List<PesanChat> riwayat = StatusAplikasi.RiwayatChat(wilayah);
+        IReadOnlyList<PesanChat> riwayat = StatusAplikasi.RiwayatChat(wilayah);
         if (riwayat.Count == 0)
         {
             lblKosong = BuatLabel(
@@ -187,7 +187,7 @@ public sealed class ChatForm : FormDasar
         if (StatusAplikasi.WilayahAktif is not { } wilayah) return;
         if (teks.Length > BatasKarakter) teks = teks[..BatasKarakter];
 
-        StatusAplikasi.RiwayatChat(wilayah).Add(new PesanChat(true, teks));
+        StatusAplikasi.TambahPesanChat(wilayah, new PesanChat(true, teks));
 
         if (lblKosong != null)
         {
@@ -211,7 +211,7 @@ public sealed class ChatForm : FormDasar
         permintaan = null;
 
         string jawaban = AsistenDemo.Jawab(DataIklim.Profil(p.Wilayah), p.Pertanyaan);
-        StatusAplikasi.RiwayatChat(p.Wilayah).Add(new PesanChat(false, jawaban));
+        StatusAplikasi.TambahPesanChat(p.Wilayah, new PesanChat(false, jawaban));
 
         barisMengetik?.Dispose();
         barisMengetik = null;
@@ -231,7 +231,7 @@ public sealed class ChatForm : FormDasar
             "Hapus Riwayat", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (jawab != DialogResult.Yes) return;
 
-        StatusAplikasi.RiwayatChat(wilayah).Clear();
+        StatusAplikasi.HapusRiwayatChat(wilayah);
         BangunUlang();
     }
 

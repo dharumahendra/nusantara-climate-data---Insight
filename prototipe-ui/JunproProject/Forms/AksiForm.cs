@@ -46,14 +46,14 @@ public sealed class AksiForm : FormDasar
     {
         Color aksen = k.Dampak switch
         {
-            "Tinggi" => Tema.Oranye,
-            "Sedang" => Tema.Teal,
+            TingkatDampak.Tinggi => Tema.Oranye,
+            TingkatDampak.Sedang => Tema.Teal,
             _ => Tema.TeksRedup,
         };
 
         FlowLayoutPanel kartu = BuatKotak(aksen);
         kartu.Controls.Add(BuatLabel(
-            $"{k.Kategori.ToUpperInvariant()}   ·   DAMPAK {k.Dampak.ToUpperInvariant()}",
+            $"{k.Kategori.ToUpperInvariant()}   ·   DAMPAK {k.Dampak.ToString().ToUpperInvariant()}",
             8.5f, true, Tema.TeksRedup));
         kartu.Controls.Add(BuatLabel(k.Judul, 13, true));
         kartu.Controls.Add(BuatParagraf(k.Deskripsi, LebarKonten - 50));

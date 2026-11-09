@@ -103,6 +103,20 @@ Fitur AI Climate Explainer (F-04) dan AI Climate Chat (F-05) membutuhkan API key
 2. Isi `Gemini.ApiKey` dengan API key dari [Google AI Studio](https://aistudio.google.com/).
 3. Buka aplikasi → halaman **Pengaturan** → masukkan API key → tekan **Uji koneksi**.
 
+## Database PostgreSQL (prototipe WinForms)
+
+Prototipe di `prototipe-ui/JunproProject` membaca daftar wilayah dan menyimpan riwayat chat di PostgreSQL. Tanpa database, aplikasi tetap berjalan memakai daftar wilayah bawaan dan riwayat chat di memori.
+
+1. Buat database dan tabelnya (skrip aman dijalankan ulang):
+
+   ```bash
+   createdb -U postgres nadi
+   psql -U postgres -d nadi -f prototipe-ui/JunproProject/Database/schema.sql
+   ```
+
+2. Salin `appsettings.example.json` menjadi `appsettings.local.json` di root repo, lalu isi `ConnectionStrings.Nadi` dengan password PostgreSQL Anda.
+3. Jalankan aplikasi, lalu buka **Pengaturan** → **Uji Koneksi Database**.
+
 ## Database
 
 Data disimpan lokal di `%LOCALAPPDATA%/NADI/nadi.db` (SQLite) setelah unduhan pertama per wilayah, sehingga aplikasi tetap bisa dipakai offline untuk wilayah yang datanya sudah pernah diunduh. Migrasi dikelola dengan `dotnet ef migrations`.

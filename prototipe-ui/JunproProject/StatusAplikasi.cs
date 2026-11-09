@@ -1,17 +1,19 @@
 namespace Junpro_Project;
 
-public sealed record PesanChat(bool DariPengguna, string Isi);
-
-// Data yang dipakai bersama oleh semua form (wilayah aktif, API key, riwayat chat).
+// Data yang dipakai bersama oleh semua form (wilayah aktif, API key,
+// koneksi database, riwayat chat).
 public static class StatusAplikasi
 {
-    private static readonly Dictionary<Wilayah, List<PesanChat>> riwayatChat = new();
+    private static IPenyimpananChat penyimpananChat = new PenyimpananChatMemori();
 
     public static Wilayah? WilayahAktif { get; private set; }
     public static ProfilIklim? Profil => WilayahAktif == null ? null : DataIklim.Profil(WilayahAktif);
 
     public static string ApiKey { get; private set; } = "";
     public static bool AiAktif => ApiKey.Length > 0;
+
+    public static DatabaseNadi? Database { get; private set; }
+    public static string KeteranganDatabase { get; private set; } = "Database belum disambungkan.";
 
     // Naik setiap ada perubahan yang memengaruhi isi halaman. Form yang sedang
     // tersembunyi membangun ulang tampilannya saat dibuka jika versinya tertinggal.
@@ -29,19 +31,24 @@ public static class StatusAplikasi
         Versi++;
     }
 
-    public static List<PesanChat> RiwayatChat(Wilayah wilayah)
+    public static void GunakanDatabase(DatabaseNadi database, string keterangan)
     {
-        if (!riwayatChat.TryGetValue(wilayah, out List<PesanChat>? riwayat))
-        {
-            riwayat = new List<PesanChat>();
-            riwayatChat[wilayah] = riwayat;
-        }
-        return riwayat;
+        Database = database;
+        KeteranganDatabase = keterangan;
+        penyimpananChat = new PenyimpananChatPostgres(database);
     }
+
+    public static void CatatDatabaseTidakAktif(string alasan) => KeteranganDatabase = alasan;
+
+    public static IReadOnlyList<PesanChat> RiwayatChat(Wilayah wilayah) => penyimpananChat.Ambil(wilayah);
+
+    public static void TambahPesanChat(Wilayah wilayah, PesanChat pesan) => penyimpananChat.Tambah(wilayah, pesan);
+
+    public static void HapusRiwayatChat(Wilayah wilayah) => penyimpananChat.Hapus(wilayah);
 
     public static void HapusSemuaRiwayatChat()
     {
-        riwayatChat.Clear();
+        penyimpananChat.HapusSemua();
         Versi++;
     }
 }

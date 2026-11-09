@@ -1,6 +1,9 @@
+using Npgsql;
+
 namespace Junpro_Project;
 
-// Pengaturan API key Gemini (PRD §11.5) + informasi & disclaimer aplikasi (PRD §22).
+// Pengaturan API key Gemini (PRD §11.5), status koneksi database,
+// serta informasi & disclaimer aplikasi (PRD §22).
 public sealed class PengaturanForm : FormDasar
 {
     private const string Disclaimer =
@@ -68,6 +71,22 @@ public sealed class PengaturanForm : FormDasar
             "Pada prototipe ini API key hanya disimpan di memori selama aplikasi berjalan dan tidak pernah " +
             "ditulis ke log. Versi akhir menyimpannya di file konfigurasi lokal yang tidak ikut di-commit."));
 
+        // --- Database ---
+        kolom.Controls.Add(BuatJudulBagian("Database PostgreSQL"));
+        kolom.Controls.Add(BuatParagraf(
+            "Daftar wilayah dan riwayat chat disimpan di PostgreSQL. Connection string diatur di " +
+            "appsettings.local.json (ConnectionStrings:Nadi) dan dibaca saat aplikasi dibuka."));
+
+        Label lblDatabase = BuatLabel(StatusAplikasi.KeteranganDatabase, 10, true,
+            StatusAplikasi.Database == null ? Tema.OranyeTua : Tema.HijauTua, LebarKonten);
+        lblDatabase.Margin = new Padding(0, 12, 0, 6);
+
+        Button ujiDatabase = BuatTombolSekunder("Uji Koneksi Database", 200, 38);
+        ujiDatabase.Click += (s, e) => UjiKoneksiDatabase(lblDatabase);
+
+        kolom.Controls.Add(BuatBaris(8, ujiDatabase));
+        kolom.Controls.Add(lblDatabase);
+
         // --- Data & riwayat ---
         kolom.Controls.Add(BuatJudulBagian("Data & Riwayat"));
         Wilayah? wilayah = StatusAplikasi.WilayahAktif;
@@ -118,6 +137,24 @@ public sealed class PengaturanForm : FormDasar
         else
             AturStatus(lblStatus, "Format API key valid. Uji koneksi langsung ke Gemini akan aktif " +
                                   "setelah fitur AI tersambung.", Tema.HijauTua);
+    }
+
+    private static void UjiKoneksiDatabase(Label lblStatus)
+    {
+        if (StatusAplikasi.Database is not { } database)
+        {
+            AturStatus(lblStatus, StatusAplikasi.KeteranganDatabase, Tema.OranyeTua);
+            return;
+        }
+
+        try
+        {
+            AturStatus(lblStatus, database.Periksa(), Tema.HijauTua);
+        }
+        catch (NpgsqlException ex)
+        {
+            AturStatus(lblStatus, "Koneksi ke PostgreSQL gagal: " + ex.Message, Tema.OranyeTua);
+        }
     }
 
     private static void AturStatus(Label lbl, string teks, Color warna)

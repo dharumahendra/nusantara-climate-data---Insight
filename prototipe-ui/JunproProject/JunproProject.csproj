@@ -13,4 +13,16 @@
     <ApplicationHighDpiMode>DpiUnawareGdiScaled</ApplicationHighDpiMode>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- Connection string PostgreSQL dibaca dari appsettings.local.json di root
+       repo (tidak di-commit, PRD §11.5); disalin ke folder output bila ada. -->
+  <ItemGroup>
+    <None Include="..\..\appsettings.local.json" Link="appsettings.local.json"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('..\..\appsettings.local.json')" />
+  </ItemGroup>
+
 </Project>
