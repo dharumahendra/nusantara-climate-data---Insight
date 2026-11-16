@@ -32,7 +32,7 @@ public static class StatusAplikasi
     public static void SimpanApiKey(string apiKey)
     {
         ApiKey = apiKey.Trim();
-
+        Asisten = AiAktif ? new AsistenGemini(ApiKey) : new AsistenDemo();
         Versi++;
     }
 
