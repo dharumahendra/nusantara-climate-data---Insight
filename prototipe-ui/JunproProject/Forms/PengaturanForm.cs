@@ -63,12 +63,17 @@ public sealed class PengaturanForm : FormDasar
         };
 
         Button uji = BuatTombolSekunder("Uji Koneksi", 140, 38);
-        uji.Click += (s, e) => UjiKoneksi(txtKey.Text, lblStatus);
+        uji.Click += async (s, e) =>
+        {
+            uji.Enabled = false;   // cegah klik ganda selama permintaan berjalan (PRD §11.6)
+            await UjiKoneksi(txtKey.Text, lblStatus);
+            uji.Enabled = true;
+        };
 
         kolom.Controls.Add(BuatBaris(12, simpan, uji));
         kolom.Controls.Add(lblStatus);
         kolom.Controls.Add(BuatCatatan(
-            "Pada prototipe ini API key hanya disimpan di memori selama aplikasi berjalan dan tidak pernah " +
+            "Pada prototipe ini API key hanya disimpan di memori (field private AsistenGemini) dan tidak pernah " +
             "ditulis ke log. Versi akhir menyimpannya di file konfigurasi lokal yang tidak ikut di-commit."));
 
         // --- Database ---
@@ -124,8 +129,8 @@ public sealed class PengaturanForm : FormDasar
         kolom.Controls.Add(kotakDisclaimer);
     }
 
-    // Belum ada panggilan ke Gemini; yang diperiksa baru bentuk API key-nya.
-    private static void UjiKoneksi(string apiKey, Label lblStatus)
+    // Memeriksa bentuk API key, lalu mengirim satu permintaan kecil ke Gemini.
+    private static async Task UjiKoneksi(string apiKey, Label lblStatus)
     {
         apiKey = apiKey.Trim();
 
@@ -135,8 +140,11 @@ public sealed class PengaturanForm : FormDasar
             AturStatus(lblStatus, "Format API key tampaknya tidak valid. Periksa kembali key dari Google AI Studio.",
                 Tema.OranyeTua);
         else
-            AturStatus(lblStatus, "Format API key valid. Uji koneksi langsung ke Gemini akan aktif " +
-                                  "setelah fitur AI tersambung.", Tema.HijauTua);
+        {
+            AturStatus(lblStatus, "Menghubungi Gemini…", Tema.TeksRedup);
+            var (berhasil, pesan) = await new AsistenGemini(apiKey).UjiKoneksiAsync();
+            AturStatus(lblStatus, pesan, berhasil ? Tema.HijauTua : Tema.OranyeTua);
+        }
     }
 
     private static void UjiKoneksiDatabase(Label lblStatus)
