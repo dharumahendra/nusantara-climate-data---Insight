@@ -12,6 +12,10 @@ public static class StatusAplikasi
     public static string ApiKey { get; private set; } = "";
     public static bool AiAktif => ApiKey.Length > 0;
 
+    // Asisten AI aktif. Bertipe kelas dasar AsistenIklim: form tidak perlu tahu
+    // apakah isinya AsistenDemo atau AsistenGemini (polymorphism).
+    public static AsistenIklim Asisten { get; private set; } = new AsistenDemo();
+
     public static DatabaseNadi? Database { get; private set; }
     public static string KeteranganDatabase { get; private set; } = "Database belum disambungkan.";
 
@@ -28,6 +32,7 @@ public static class StatusAplikasi
     public static void SimpanApiKey(string apiKey)
     {
         ApiKey = apiKey.Trim();
+
         Versi++;
     }
 

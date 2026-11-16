@@ -443,7 +443,7 @@ public abstract class FormDasar : Form
         return false;
     }
 
-    // Penanda bahwa jawaban AI masih contoh (belum tersambung ke Gemini).
+    // Penanda asisten yang sedang menjawab: Gemini atau mode demo.
     protected Control BuatBannerDemo()
     {
         FlowLayoutPanel banner = new FlowLayoutPanel
@@ -460,12 +460,13 @@ public abstract class FormDasar : Form
         };
         BeriBingkai(banner, Tema.Oranye);
 
-        bool aiAktif = StatusAplikasi.AiAktif;
+        AsistenIklim asisten = StatusAplikasi.Asisten;
+        bool aiAktif = asisten.MemakaiAi;
         string pesan = aiAktif
-            ? "Mode demo: API key sudah tersimpan, tetapi NADI belum tersambung ke Gemini. " +
-              "Jawaban AI di halaman ini masih berupa contoh."
-            : "Fitur AI belum aktif — masukkan API key di Pengaturan. " +
-              "Sementara itu, jawaban AI di halaman ini berupa contoh (mode demo).";
+            ? $"Asisten aktif: {asisten.Nama}. Jawaban disusun AI dari angka yang dihitung aplikasi; " +
+              "bila Gemini tidak dapat dihubungi, NADI memakai jawaban mode demo."
+            : $"Asisten aktif: {asisten.Nama}. Fitur AI belum aktif — masukkan API key di Pengaturan. " +
+              "Sementara itu, jawaban di halaman ini berupa contoh.";
 
         Label lbl = BuatLabel(pesan, 9.5f, false, Tema.Teks, aiAktif ? LebarKonten - 40 : LebarKonten - 190);
         lbl.Margin = new Padding(0, 4, 12, 0);

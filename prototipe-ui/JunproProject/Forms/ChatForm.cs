@@ -4,7 +4,7 @@ namespace Junpro_Project;
 // wilayah sehingga tetap ada saat pengguna kembali ke halaman ini.
 public sealed class ChatForm : FormDasar
 {
-    private const int BatasKarakter = 500;   // PRD §11.6
+    private const int BatasKarakter = AsistenIklim.BatasKarakterPertanyaan;   // PRD §11.6
 
     private static readonly string[] pertanyaanSaran =
     {
@@ -13,7 +13,6 @@ public sealed class ChatForm : FormDasar
         "Apa yang bisa saya lakukan?"
     };
 
-    private readonly System.Windows.Forms.Timer timerJawab = new System.Windows.Forms.Timer { Interval = 900 };
     private readonly List<Button> tombolSaran = new();
     private FlowLayoutPanel? areaChat;
     private TextBox? txtPesan;
@@ -26,8 +25,6 @@ public sealed class ChatForm : FormDasar
 
     public ChatForm() : base("Chat AI")
     {
-        // Jeda meniru waktu tunggu respons AI.
-        timerJawab.Tick += (s, e) => JawabanSiap();
     }
 
     protected override void BangunKonten(FlowLayoutPanel kolom)
@@ -180,7 +177,7 @@ public sealed class ChatForm : FormDasar
         return baris;
     }
 
-    private void Kirim(string teks)
+    private async void Kirim(string teks)
     {
         teks = teks.Trim();
         if (permintaan != null || teks.Length == 0 || areaChat == null) return;
@@ -201,16 +198,18 @@ public sealed class ChatForm : FormDasar
 
         if (txtPesan != null) txtPesan.Text = "";
         PerbaruiStatusInput();
-        timerJawab.Start();
+
+        // Polymorphism: yang menjawab bisa AsistenDemo atau AsistenGemini,
+        // tergantung objek yang sedang tersimpan di StatusAplikasi.Asisten.
+        string jawaban = await StatusAplikasi.Asisten.JawabAsync(DataIklim.Profil(wilayah), teks);
+        JawabanSiap(jawaban);
     }
 
-    private void JawabanSiap()
+    private void JawabanSiap(string jawaban)
     {
-        timerJawab.Stop();
         if (permintaan is not { } p) return;
         permintaan = null;
 
-        string jawaban = AsistenDemo.Jawab(DataIklim.Profil(p.Wilayah), p.Pertanyaan);
         StatusAplikasi.TambahPesanChat(p.Wilayah, new PesanChat(false, jawaban));
 
         barisMengetik?.Dispose();

@@ -10,16 +10,13 @@ public sealed class InsightForm : FormDasar
         Indikator.CurahHujan, Indikator.HariPanas
     };
 
-    private readonly Dictionary<(Wilayah, Indikator), string> penjelasanAi = new();
-    private readonly System.Windows.Forms.Timer timerAi = new System.Windows.Forms.Timer { Interval = 1200 };
+    private readonly Dictionary<(Wilayah, Indikator), (string Teks, string Sumber, bool DariAi)> penjelasanAi = new();
     private Indikator indikator = Indikator.SuhuRataRata;
     private (Wilayah Wilayah, Indikator Indikator)? permintaanAi;
     private FlowLayoutPanel? wadahAi;
 
     public InsightForm() : base("Climate Insight")
     {
-        // Jeda meniru waktu tunggu respons AI.
-        timerAi.Tick += (s, e) => PenjelasanSiap();
     }
 
     protected override void BangunKonten(FlowLayoutPanel kolom)
@@ -146,14 +143,15 @@ public sealed class InsightForm : FormDasar
             c.Dispose();
 
         var kunci = (profil.Wilayah, indikator);
-        if (penjelasanAi.TryGetValue(kunci, out string? teks))
+        if (penjelasanAi.TryGetValue(kunci, out var hasil))
         {
             FlowLayoutPanel kotak = BuatKotak(Tema.Teal);
-            kotak.Controls.Add(BuatParagraf(teks, LebarKonten - 50));
+            kotak.Controls.Add(BuatParagraf(hasil.Teks, LebarKonten - 50));
 
             Label sumber = BuatCatatan(
                 "Penjelasan dibuat AI berdasarkan angka yang dihitung aplikasi. Angka bersumber dari " +
-                "ERA5/Open-Meteo. (Mode demo: teks contoh dari data ilustrasi.)", LebarKonten - 50);
+                "ERA5/Open-Meteo. Disusun oleh: " + hasil.Sumber +
+                (hasil.DariAi ? "." : " — teks contoh dari data ilustrasi."), LebarKonten - 50);
             sumber.Margin = new Padding(0, 8, 0, 0);
             kotak.Controls.Add(sumber);
             wadahAi.Controls.Add(kotak);
@@ -174,22 +172,26 @@ public sealed class InsightForm : FormDasar
         wadahAi.ResumeLayout();
     }
 
-    private void MintaPenjelasan(ProfilIklim profil)
+    private async void MintaPenjelasan(ProfilIklim profil)
     {
         // Tombol dinonaktifkan selama permintaan berjalan (PRD §11.6).
         if (permintaanAi != null) return;
 
         permintaanAi = (profil.Wilayah, indikator);
         IsiWadahAi(profil);
-        timerAi.Start();
+
+        // Polymorphism: JelaskanAsync() milik kelas dasar AsistenIklim memanggil
+        // SusunPenjelasanAsync() versi subclass yang sedang aktif.
+        AsistenIklim asisten = StatusAplikasi.Asisten;
+        string teks = await asisten.JelaskanAsync(profil, indikator);
+        PenjelasanSiap(teks, asisten);
     }
 
-    private void PenjelasanSiap()
+    private void PenjelasanSiap(string teks, AsistenIklim asisten)
     {
-        timerAi.Stop();
         if (permintaanAi is not { } p) return;
 
-        penjelasanAi[(p.Wilayah, p.Indikator)] = AsistenDemo.Jelaskan(DataIklim.Profil(p.Wilayah), p.Indikator);
+        penjelasanAi[(p.Wilayah, p.Indikator)] = (teks, asisten.Nama, asisten.MemakaiAi);
         permintaanAi = null;
 
         if (StatusAplikasi.Profil is { } profil)
