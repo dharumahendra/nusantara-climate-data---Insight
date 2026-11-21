@@ -1,12 +1,9 @@
-using System.Text.Json;
 using Npgsql;
 
 namespace Junpro_Project;
 
 public sealed class DatabaseNadi : IDisposable
 {
-    private const string FileKonfigurasi = "appsettings.local.json";
-
     private readonly NpgsqlDataSource sumberData;
 
     private DatabaseNadi(NpgsqlDataSource sumberData)
@@ -17,7 +14,7 @@ public sealed class DatabaseNadi : IDisposable
     // Mengembalikan null bila connection string belum diatur.
     public static DatabaseNadi? DariKonfigurasi()
     {
-        string? connectionString = BacaConnectionString();
+        string? connectionString = KonfigurasiLokal.ConnectionStringNadi();
         return string.IsNullOrWhiteSpace(connectionString)
             ? null
             : new DatabaseNadi(NpgsqlDataSource.Create(connectionString));
@@ -43,16 +40,4 @@ public sealed class DatabaseNadi : IDisposable
     }
 
     public void Dispose() => sumberData.Dispose();
-
-    private static string? BacaConnectionString()
-    {
-        string path = Path.Combine(AppContext.BaseDirectory, FileKonfigurasi);
-        if (!File.Exists(path)) return null;
-
-        using JsonDocument json = JsonDocument.Parse(File.ReadAllText(path));
-        return json.RootElement.TryGetProperty("ConnectionStrings", out JsonElement daftar) &&
-               daftar.TryGetProperty("Nadi", out JsonElement nadi)
-            ? nadi.GetString()
-            : null;
-    }
 }

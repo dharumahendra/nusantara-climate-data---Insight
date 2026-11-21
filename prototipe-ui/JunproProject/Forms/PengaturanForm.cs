@@ -73,8 +73,9 @@ public sealed class PengaturanForm : FormDasar
         kolom.Controls.Add(BuatBaris(12, simpan, uji));
         kolom.Controls.Add(lblStatus);
         kolom.Controls.Add(BuatCatatan(
-            "Pada prototipe ini API key hanya disimpan di memori (field private AsistenGemini) dan tidak pernah " +
-            "ditulis ke log. Versi akhir menyimpannya di file konfigurasi lokal yang tidak ikut di-commit."));
+            "API key yang diketik di sini hanya disimpan di memori (field private AsistenGemini) selama aplikasi " +
+            "terbuka dan tidak pernah ditulis ke log. Agar tidak perlu mengetik ulang, isi Gemini:ApiKey di " +
+            "appsettings.local.json (file ini tidak ikut di-commit)."));
 
         // --- Database ---
         kolom.Controls.Add(BuatJudulBagian("Database PostgreSQL"));
