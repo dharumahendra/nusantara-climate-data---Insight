@@ -18,6 +18,12 @@ public sealed class DashboardForm : FormDasar
 
     public DashboardForm() : base("Dashboard Explore")
     {
+        // Pilihan terakhir dipulihkan saat aplikasi dibuka lagi (PRD F-01).
+        if (PilihanTerakhir.Baca() is { } terakhir)
+        {
+            provinsiDipilih = terakhir.Provinsi;
+            kotaDipilih = terakhir.Kota;
+        }
     }
 
     protected override void BangunKonten(FlowLayoutPanel kolom)

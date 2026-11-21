@@ -29,6 +29,7 @@ public static class StatusAplikasi
     public static void PilihWilayah(Wilayah wilayah)
     {
         WilayahAktif = wilayah;
+        PilihanTerakhir.Simpan(wilayah);
         Versi++;
     }
 
