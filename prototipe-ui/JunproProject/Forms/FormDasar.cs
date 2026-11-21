@@ -277,7 +277,7 @@ public abstract class FormDasar : Form
             Text = teks,
             Size = new Size(lebar, tinggi),
             AutoSize = true,   // lebar/tinggi di atas jadi ukuran minimum; teks tidak terpotong
-            BackColor = Tema.Teal,
+            BackColor = Tema.TealTeks,
             ForeColor = Tema.Putih,
             FlatStyle = FlatStyle.Flat,
             Font = Tema.Huruf(10),
@@ -285,7 +285,7 @@ public abstract class FormDasar : Form
             UseVisualStyleBackColor = false
         };
         tombol.FlatAppearance.BorderSize = 0;
-        tombol.FlatAppearance.MouseOverBackColor = Tema.TealHover;
+        tombol.FlatAppearance.MouseOverBackColor = Tema.TealTeksHover;
         return tombol;
     }
 
@@ -293,9 +293,9 @@ public abstract class FormDasar : Form
     {
         Button tombol = BuatTombol(teks, lebar, tinggi);
         tombol.BackColor = Tema.Putih;
-        tombol.ForeColor = Tema.Teal;
+        tombol.ForeColor = Tema.TealTeks;
         tombol.FlatAppearance.BorderSize = 1;
-        tombol.FlatAppearance.BorderColor = Tema.Teal;
+        tombol.FlatAppearance.BorderColor = Tema.TealTeks;
         tombol.FlatAppearance.MouseOverBackColor = Tema.TealMuda;
         return tombol;
     }

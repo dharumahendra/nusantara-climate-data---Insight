@@ -152,7 +152,7 @@ public sealed class ChatForm : FormDasar
             Padding = new Padding(12, 8, 12, 8),
             Margin = new Padding(0),
             Font = Tema.Huruf(10),
-            BackColor = dariPengguna ? Tema.Teal : Tema.GelembungAi,
+            BackColor = dariPengguna ? Tema.TealTeks : Tema.GelembungAi,
             ForeColor = dariPengguna ? Tema.Putih : Tema.Teks,
             Text = isi
         };

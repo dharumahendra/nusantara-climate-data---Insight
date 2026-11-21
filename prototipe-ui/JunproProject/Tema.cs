@@ -9,7 +9,11 @@ public static class Tema
     public static readonly Color Navy = Color.FromArgb(20, 45, 78);
     public static readonly Color NavAktif = Color.FromArgb(35, 70, 115);
     public static readonly Color Teal = Color.FromArgb(15, 157, 138);
-    public static readonly Color TealHover = Color.FromArgb(12, 135, 120);
+
+    // Teal gelap untuk komponen yang memuat teks. Teal asli (3,4:1 terhadap putih) tidak
+    // memenuhi kontras teks 4,5:1 (PRD §12); varian ini 5,5:1 di putih dan 4,9:1 di latar hover.
+    public static readonly Color TealTeks = Color.FromArgb(10, 118, 103);
+    public static readonly Color TealTeksHover = Color.FromArgb(8, 100, 88);
     public static readonly Color TealMuda = Color.FromArgb(226, 244, 241);
     public static readonly Color Latar = Color.FromArgb(244, 247, 250);
     public static readonly Color Putih = Color.White;
