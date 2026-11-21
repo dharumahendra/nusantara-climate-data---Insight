@@ -34,39 +34,58 @@ public sealed class InsightForm : FormDasar
 
         kolom.Controls.Add(BuatLabel(
             $"Analisis Tren {Format.NamaIndikator(ind)} Historis ({profil.Periode})", 13, true, Tema.Teks));
-        kolom.Controls.Add(BuatCatatan(profil.Wilayah.NamaLengkap + "  ·  data ilustrasi"));
+        kolom.Controls.Add(BuatCatatan(profil.Wilayah.NamaLengkap + "  ·  sumber: ERA5 via Open-Meteo"));
         kolom.Controls.Add(BuatPemilihIndikator());
 
         // --- Grafik garis + garis tren ---
         GrafikGarisPanel grafik = new GrafikGarisPanel(
             profil.Tahun,
-            new[] { new SeriGrafik(profil.Wilayah.Kota, profil.Nilai(ind), Tema.Teal) },
+            new[] { new SeriGrafik(profil.Wilayah.Kota, profil.Nilai(ind), Tema.Teal, Baseline: profil.Baseline(ind)) },
             v => Format.Nilai(ind, v),
+            v => Format.Perubahan(ind, v),
             Format.PolaSumbu(ind),
-            tampilkanTren: true)
+            tampilkanTren: profil.TrenTersedia)
         {
             Size = new Size(LebarKonten, 280),
             Margin = new Padding(0, 4, 0, 6)
         };
         kolom.Controls.Add(grafik);
         kolom.Controls.Add(BuatCatatan(
-            "Garis putus-putus oranye = garis tren (regresi linear). " +
-            "Arahkan kursor ke grafik untuk melihat nilai tiap tahun."));
+            (profil.TrenTersedia ? "Garis putus-putus oranye = garis tren (regresi linear). " : "") +
+            "Arahkan kursor ke grafik untuk melihat nilai dan anomali tiap tahun " +
+            "terhadap rata-rata normal 1991–2020."));
+        if (ind == Indikator.HariPanas)
+            kolom.Controls.Add(BuatCatatan(
+                $"Hari panas = hari dengan suhu maksimum ≥ {Format.Angka(profil.AmbangHariPanas, "0.0")} °C, " +
+                "yaitu persentil ke-90 suhu maksimum harian wilayah ini pada 1991–2020."));
+        if (profil.TahunTidakValid.Length > 0)
+            kolom.Controls.Add(BuatCatatan(
+                "Tahun dikecualikan (data kurang dari 330 hari): " + string.Join(", ", profil.TahunTidakValid) + "."));
 
-        // --- Statistik tren ---
-        FlowLayoutPanel kartu = BuatBarisKartu();
-        kartu.Controls.Add(BuatKartu("ARAH TREN", tren.Arah,
-            tren.BelumJelas ? "tren belum jelas" : "periode " + profil.Periode));
-        kartu.Controls.Add(BuatKartu("TREN PER DEKADE",
-            Format.Perubahan(ind, tren.SlopePerDekade), "setiap 10 tahun"));
-        kartu.Controls.Add(BuatKartu("PERUBAHAN TOTAL",
-            Format.Perubahan(ind, tren.PerubahanTotal), $"dalam {profil.TahunAkhir - profil.TahunAwal} tahun"));
-        kartu.Controls.Add(BuatKartu("KEYAKINAN TREN", tren.Keyakinan,
-            "R² = " + Format.Angka(tren.RSquared, "0.00")));
-        kolom.Controls.Add(kartu);
+        if (!profil.TrenTersedia)
+        {
+            kolom.Controls.Add(BuatJudulBagian("Temuan Utama"));
+            kolom.Controls.Add(BuatParagraf(
+                $"Data belum cukup untuk analisis tren: hanya {profil.Tahun.Length} dari " +
+                $"{profil.JumlahTahunPeriode} tahun yang valid (minimal {ProfilIklim.MinTahunUntukTren})."));
+        }
+        else
+        {
+            // --- Statistik tren ---
+            FlowLayoutPanel kartu = BuatBarisKartu();
+            kartu.Controls.Add(BuatKartu("ARAH TREN", tren.Arah,
+                tren.BelumJelas ? "tren belum jelas" : "periode " + profil.Periode));
+            kartu.Controls.Add(BuatKartu("TREN PER DEKADE",
+                Format.Perubahan(ind, tren.SlopePerDekade), "setiap 10 tahun"));
+            kartu.Controls.Add(BuatKartu("PERUBAHAN TOTAL",
+                Format.Perubahan(ind, tren.PerubahanTotal), $"dalam {profil.TahunAkhir - profil.TahunAwal} tahun"));
+            kartu.Controls.Add(BuatKartu("KEYAKINAN TREN", tren.Keyakinan,
+                "R² = " + Format.Angka(tren.RSquared, "0.00")));
+            kolom.Controls.Add(kartu);
 
-        kolom.Controls.Add(BuatJudulBagian("Temuan Utama"));
-        kolom.Controls.Add(BuatParagraf(Narasi.TemuanUtama(profil, ind)));
+            kolom.Controls.Add(BuatJudulBagian("Temuan Utama"));
+            kolom.Controls.Add(BuatParagraf(Narasi.TemuanUtama(profil, ind)));
+        }
 
         // --- Penjelasan AI ---
         kolom.Controls.Add(BuatJudulBagian("Penjelasan AI"));
@@ -94,8 +113,8 @@ public sealed class InsightForm : FormDasar
         kolom.Controls.Add(BuatBaris(16, aksi, chat, banding));
 
         Label catatan = BuatCatatan(
-            "Catatan: grafik dan narasi di halaman ini masih memakai data ilustrasi, " +
-            "bukan hasil analisis data historis aktual.");
+            "Catatan: data iklim bersumber dari reanalisis ERA5 melalui Open-Meteo dan dapat berbeda dari " +
+            "pengamatan stasiun cuaca resmi. Untuk informasi resmi, rujuk BMKG.");
         catatan.Margin = new Padding(0, 20, 0, 0);
         kolom.Controls.Add(catatan);
     }
@@ -151,7 +170,7 @@ public sealed class InsightForm : FormDasar
             Label sumber = BuatCatatan(
                 "Penjelasan dibuat AI berdasarkan angka yang dihitung aplikasi. Angka bersumber dari " +
                 "ERA5/Open-Meteo. Disusun oleh: " + hasil.Sumber +
-                (hasil.DariAi ? "." : " — teks contoh dari data ilustrasi."), LebarKonten - 50);
+                (hasil.DariAi ? "." : " — teks disusun dari template NADI, bukan oleh model AI."), LebarKonten - 50);
             sumber.Margin = new Padding(0, 8, 0, 0);
             kotak.Controls.Add(sumber);
             wadahAi.Controls.Add(kotak);
