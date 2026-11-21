@@ -70,7 +70,7 @@ public abstract class AsistenIklim
         {
             ["wilayah"] = profil.Wilayah.NamaLengkap,
             ["periode"] = new { mulai = profil.TahunAwal, akhir = profil.TahunAkhir, tahun_valid = profil.Tahun.Length },
-            ["sumber_data"] = "Data ilustrasi prototipe NADI (rencana: ERA5 via Open-Meteo)",
+            ["sumber_data"] = "ERA5 via Open-Meteo",
         };
 
         foreach (Indikator i in indikator)
@@ -80,6 +80,7 @@ public abstract class AsistenIklim
             {
                 satuan = Satuan(i),
                 rata_rata = Math.Round(profil.RataRata(i), 2),
+                rata_rata_baseline_1991_2020 = profil.Baseline(i) is double b ? Math.Round(b, 2) : (double?)null,
                 nilai_tahun_terakhir = Math.Round(profil.Terakhir(i), 2),
                 tren_per_dekade = Math.Round(t.SlopePerDekade, 2),
                 perubahan_total = Math.Round(t.PerubahanTotal, 2),
