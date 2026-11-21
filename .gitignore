@@ -19,3 +19,7 @@ appsettings.local.json
 
 # Log aplikasi
 logs/
+
+# Paket rilis hasil prototipe-ui/buat-paket.ps1
+dist/
+dist-uji/
