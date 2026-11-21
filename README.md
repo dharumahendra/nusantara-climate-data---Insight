@@ -133,6 +133,14 @@ dotnet test prototipe-ui/JunproProject.Tests
 
 Test memakai respons API asli yang disimpan di `prototipe-ui/JunproProject.Tests/Fixtures`, sehingga tidak membutuhkan internet maupun database.
 
+### Membuat paket rilis (`NADI.exe`)
+
+```powershell
+.\prototipe-ui\buat-paket.ps1
+```
+
+Skrip ini menghasilkan folder `dist\NADI\` (satu `NADI.exe` mandiri tanpa perlu .NET, skrip `siapkan-database`, skema, contoh konfigurasi, dan panduan) serta `dist\NADI-v1.0.0-win-x64.zip`. Folder `dist/` tidak ikut di-commit, dan paket tidak pernah membawa `appsettings.local.json` milik pengembang. Panduan pemakaian untuk pengguna ada di [`docs/PANDUAN.md`](docs/PANDUAN.md).
+
 ## Database
 
 Data disimpan lokal di `%LOCALAPPDATA%/NADI/nadi.db` (SQLite) setelah unduhan pertama per wilayah, sehingga aplikasi tetap bisa dipakai offline untuk wilayah yang datanya sudah pernah diunduh. Migrasi dikelola dengan `dotnet ef migrations`.
