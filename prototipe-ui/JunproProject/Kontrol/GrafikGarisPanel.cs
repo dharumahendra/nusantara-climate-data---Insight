@@ -2,7 +2,9 @@ using System.Drawing.Drawing2D;
 
 namespace Junpro_Project;
 
-public sealed record SeriGrafik(string Nama, double[] Nilai, Color Warna, bool PutusPutus = false);
+// Baseline (nilai normal 1991-2020) opsional; bila ada, tooltip menampilkan anomalinya.
+public sealed record SeriGrafik(string Nama, double[] Nilai, Color Warna, bool PutusPutus = false,
+                                double? Baseline = null);
 
 // Grafik garis deret tahunan (PRD F-02/F-03). Garis tren bisa ditumpangkan,
 // dan nilai tiap tahun muncul saat kursor diarahkan ke grafik.
@@ -14,16 +16,18 @@ public sealed class GrafikGarisPanel : Panel
     private readonly int[] tahun;
     private readonly SeriGrafik[] seri;
     private readonly Func<double, string> formatNilai;
+    private readonly Func<double, string> formatAnomali;
     private readonly string polaSumbu;
     private readonly bool tampilkanTren;
     private int indeksHover = -1;
 
     public GrafikGarisPanel(int[] tahun, SeriGrafik[] seri, Func<double, string> formatNilai,
-                            string polaSumbu, bool tampilkanTren)
+                            Func<double, string> formatAnomali, string polaSumbu, bool tampilkanTren)
     {
         this.tahun = tahun;
         this.seri = seri;
         this.formatNilai = formatNilai;
+        this.formatAnomali = formatAnomali;
         this.polaSumbu = polaSumbu;
         this.tampilkanTren = tampilkanTren;
         BackColor = Color.White;
@@ -129,7 +133,11 @@ public sealed class GrafikGarisPanel : Panel
         double min = semua.Min(), maks = semua.Max();
         double jarak = maks - min;
         double pad = jarak == 0 ? 1 : jarak * 0.15;
-        return (min - pad, maks + pad);
+
+        // Jumlah hari, curah hujan, dan suhu di wilayah tropis tidak pernah negatif:
+        // padding tidak boleh membuat sumbu turun di bawah nol.
+        double bawah = min >= 0 ? Math.Max(0, min - pad) : min - pad;
+        return (bawah, maks + pad);
     }
 
     private void GambarLegenda(Graphics g, Font font, Brush brTeks)
@@ -156,11 +164,17 @@ public sealed class GrafikGarisPanel : Panel
             g.DrawLine(penPemandu, x, area.Top, x, area.Bottom);
 
         string judul = tahun[indeksHover].ToString();
-        string[] baris = seri.Select(s => (seri.Length > 1 ? s.Nama + ": " : "") + formatNilai(s.Nilai[indeksHover])).ToArray();
+        List<string> baris = new();
+        foreach (SeriGrafik s in seri)
+        {
+            baris.Add((seri.Length > 1 ? s.Nama + ": " : "") + formatNilai(s.Nilai[indeksHover]));
+            if (s.Baseline is double normal)
+                baris.Add((seri.Length > 1 ? "   " : "") + "Anomali: " + formatAnomali(s.Nilai[indeksHover] - normal));
+        }
 
         float lebar = Math.Max(g.MeasureString(judul, fTebal).Width,
                                baris.Max(b => g.MeasureString(b, font).Width)) + 16;
-        float tinggi = 22 + baris.Length * 16;
+        float tinggi = 22 + baris.Count * 16;
         float kotakX = x + 10 + lebar > area.Right ? x - 10 - lebar : x + 10;
         RectangleF kotak = new RectangleF(kotakX, area.Top + 6, lebar, tinggi);
 
@@ -172,7 +186,7 @@ public sealed class GrafikGarisPanel : Panel
         }
 
         g.DrawString(judul, fTebal, brTeks, kotak.X + 8, kotak.Y + 4);
-        for (int i = 0; i < baris.Length; i++)
+        for (int i = 0; i < baris.Count; i++)
             g.DrawString(baris[i], font, brTeks, kotak.X + 8, kotak.Y + 20 + i * 16);
     }
 
