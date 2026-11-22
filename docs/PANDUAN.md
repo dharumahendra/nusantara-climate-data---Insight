@@ -99,8 +99,9 @@ Menampilkan 3–5 kartu rekomendasi. Rekomendasi dipilih oleh **aturan tetap** d
 - **API Key Google Gemini** (opsional): untuk Penjelasan AI dan Chat AI yang memakai model sungguhan.
   1. Ambil key gratis di [Google AI Studio](https://aistudio.google.com/).
   2. Tempel di kotak, tekan **Uji Koneksi**, lalu **Simpan**.
-  3. Agar tidak perlu mengetik ulang, isi `Gemini` → `ApiKey` di `appsettings.local.json`.
+  3. Agar tidak perlu mengetik ulang, isi `Gemini` → `ApiKey` di `appsettings.local.json` (bukan `appsettings.example.json`; berkas contoh tidak dibaca aplikasi).
   - Tanpa key, aplikasi memakai **mode demo** (jawaban dari template; banner kuning menandainya).
+  - Aplikasi mencoba `gemini-2.5-flash` lebih dulu, lalu `gemini-flash-latest` bila model pertama sibuk atau tidak membalas (maksimal 20 detik per model).
   - Bila Gemini tidak bisa dihubungi, jawaban otomatis memakai mode demo dan ada catatan alasannya.
 - **Database PostgreSQL**: tombol **Uji Koneksi Database** menampilkan status dan jumlah wilayah/data tersimpan.
 - **Data & Riwayat**: ganti wilayah atau hapus semua riwayat chat.

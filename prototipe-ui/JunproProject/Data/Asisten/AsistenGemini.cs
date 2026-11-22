@@ -12,25 +12,39 @@ namespace Junpro_Project;
 public sealed class AsistenGemini : AsistenIklim
 {
     // Nama model & endpoint dapat berubah; verifikasi ke dokumentasi Google AI (PRD §11.6).
-    private const string Model = "gemini-flash-latest";
-    private const string Endpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/" + Model + ":generateContent";
+    // Dicoba berurutan: model bernomor lebih stabil, alias "-latest" menjadi cadangan.
+    // Bila satu model sibuk (5xx), hilang (404), kuotanya habis (429), atau tidak membalas,
+    // model berikutnya dicoba.
+    private static readonly string[] DaftarModel = { "gemini-2.5-flash", "gemini-flash-latest" };
+    private const string AwalEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/";
+    private const string AkhiranEndpoint = ":generateContent";
 
-    private static readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(30) };
+    // Batas tunggu per model; dua model berarti paling lama sekitar 40 detik sebelum mode demo.
+    private static readonly TimeSpan BatasTunggu = TimeSpan.FromSeconds(20);
+    private static readonly HttpClient httpBersama = new() { Timeout = BatasTunggu };
+
+    private readonly HttpClient http;
+    private string modelTerpakai = DaftarModel[0];
 
     // Encapsulation: API key hanya disimpan di field private ini. Tidak ada
     // properti yang mengembalikannya, sehingga tidak bisa dibaca atau
     // tercetak ke log dari luar kelas (PRD §11.5).
     private readonly string apiKey;
 
-    public AsistenGemini(string apiKey)
+    public AsistenGemini(string apiKey) : this(apiKey, null)
+    {
+    }
+
+    // Klien HTTP dapat diganti (dipakai pengujian dengan respons palsu).
+    public AsistenGemini(string apiKey, HttpClient? klien)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new ArgumentException("API key Gemini wajib diisi.", nameof(apiKey));
         this.apiKey = apiKey.Trim();
+        http = klien ?? httpBersama;
     }
 
-    public override string Nama => "Google Gemini (" + Model + ")";
+    public override string Nama => "Google Gemini (" + modelTerpakai + ")";
 
     public override bool MemakaiAi => true;
 
@@ -72,7 +86,7 @@ public sealed class AsistenGemini : AsistenIklim
         {
             await KirimAsync("Balas dengan satu kata: siap", null);
             return (true, "Koneksi ke Gemini berhasil. Simpan API key agar Penjelasan AI dan Chat AI memakai " +
-                          Model + ".");
+                          modelTerpakai + ".");
         }
         catch (GagalMenghubungiGemini ex)
         {
@@ -80,6 +94,9 @@ public sealed class AsistenGemini : AsistenIklim
         }
     }
 
+    // Mencoba tiap model berurutan. Kegagalan yang berasal dari model (sibuk, hilang, tidak
+    // membalas, kuota habis) berlanjut ke model berikutnya, karena kuota gratis Gemini dihitung
+    // per model. Key ditolak dan tanpa internet langsung dilaporkan: model lain tidak akan berbeda.
     private async Task<string> KirimAsync(string pesan, string? instruksiSistem)
     {
         object isi = instruksiSistem == null
@@ -90,7 +107,26 @@ public sealed class AsistenGemini : AsistenIklim
                 contents = new[] { new { role = "user", parts = new[] { new { text = pesan } } } }
             };
 
-        using HttpRequestMessage permintaan = new(HttpMethod.Post, Endpoint)
+        GagalMenghubungiGemini? terakhir = null;
+        foreach (string model in DaftarModel)
+        {
+            try
+            {
+                string teks = await KirimKeModelAsync(model, isi);
+                modelTerpakai = model;
+                return teks;
+            }
+            catch (GagalMenghubungiGemini ex) when (ex.BisaCobaModelLain)
+            {
+                terakhir = ex;
+            }
+        }
+        throw terakhir!;
+    }
+
+    private async Task<string> KirimKeModelAsync(string model, object isi)
+    {
+        using HttpRequestMessage permintaan = new(HttpMethod.Post, AwalEndpoint + model + AkhiranEndpoint)
         {
             Content = JsonContent.Create(isi)
         };
@@ -100,7 +136,8 @@ public sealed class AsistenGemini : AsistenIklim
         {
             using HttpResponseMessage respons = await http.SendAsync(permintaan);
             if (!respons.IsSuccessStatusCode)
-                throw new GagalMenghubungiGemini(PesanStatus(respons.StatusCode));
+                throw new GagalMenghubungiGemini(PesanStatus(respons.StatusCode, model),
+                    BisaCobaModelLain(respons.StatusCode));
 
             using JsonDocument json = JsonDocument.Parse(await respons.Content.ReadAsStringAsync());
             return AmbilTeks(json.RootElement);
@@ -111,7 +148,8 @@ public sealed class AsistenGemini : AsistenIklim
         }
         catch (TaskCanceledException)
         {
-            throw new GagalMenghubungiGemini("Gemini terlalu lama merespons");
+            throw new GagalMenghubungiGemini("Gemini tidak membalas dalam " + (int)BatasTunggu.TotalSeconds +
+                                             " detik, kemungkinan sedang sibuk", bisaCobaModelLain: true);
         }
         catch (JsonException)
         {
@@ -132,12 +170,16 @@ public sealed class AsistenGemini : AsistenIklim
         throw new GagalMenghubungiGemini("Gemini tidak mengembalikan jawaban (mungkin diblokir filter keamanan)");
     }
 
-    private static string PesanStatus(HttpStatusCode status) => status switch
+    private static bool BisaCobaModelLain(HttpStatusCode status) =>
+        status is HttpStatusCode.NotFound or HttpStatusCode.TooManyRequests || (int)status >= 500;
+
+    private static string PesanStatus(HttpStatusCode status, string model) => status switch
     {
         HttpStatusCode.TooManyRequests => "Kuota AI sedang penuh, coba lagi beberapa saat lagi",
         HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden
             => "API key ditolak oleh Gemini — periksa kembali key dari Google AI Studio",
-        HttpStatusCode.NotFound => "model " + Model + " tidak ditemukan",
+        HttpStatusCode.NotFound => "model " + model + " tidak ditemukan",
+        HttpStatusCode.ServiceUnavailable => "server Gemini sedang sibuk (503), coba lagi beberapa saat lagi",
         _ => "server Gemini membalas dengan status " + (int)status,
     };
 
@@ -147,8 +189,11 @@ public sealed class AsistenGemini : AsistenIklim
     // private nested class: jenis error ini hanya dikenal di dalam AsistenGemini.
     private sealed class GagalMenghubungiGemini : Exception
     {
-        public GagalMenghubungiGemini(string pesan) : base(pesan)
+        public bool BisaCobaModelLain { get; }
+
+        public GagalMenghubungiGemini(string pesan, bool bisaCobaModelLain = false) : base(pesan)
         {
+            BisaCobaModelLain = bisaCobaModelLain;
         }
     }
 }

@@ -14,7 +14,7 @@
 
 - Aplikasi dijalankan **utuh** (form asli, database PostgreSQL 18 yang bersih, API Open-Meteo yang sungguhan) dan digerakkan oleh skrip yang meniru klik dan ketikan pengguna, lalu membaca isi layar. Pernyataan "Sesuai" hanya diberikan bila isi layar yang teramati cocok dengan reaksi yang diharapkan.
 - Gangguan yang sulit dibuat manual disimulasikan di lapisan jaringan: internet mati, kuota habis (HTTP 429), server error (HTTP 500), dan respons berformat salah. Kasus lainnya memakai jaringan dan database nyata. Kasus Gemini memakai API key palsu ke server Google sungguhan.
-- Skrip penguji bukan bagian dari repo. Sebagai gantinya, logika yang sama dijaga oleh **105 unit test** (`dotnet test prototipe-ui/JunproProject.Tests`).
+- Skrip penguji bukan bagian dari repo. Sebagai gantinya, logika yang sama dijaga oleh **117 unit test** (`dotnet test prototipe-ui/JunproProject.Tests`).
 - Kolom **Reaksi Sistem (Salah)** menjelaskan perilaku yang dianggap gagal; kolom **Pengamatan** berisi apa yang benar-benar terlihat saat pengujian.
 
 ## Ringkasan per halaman
