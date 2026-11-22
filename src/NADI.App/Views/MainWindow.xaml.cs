@@ -1,8 +1,6 @@
-using System.Windows;
-
 namespace NADI.App.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : System.Windows.Window
 {
     public MainWindow()
     {
