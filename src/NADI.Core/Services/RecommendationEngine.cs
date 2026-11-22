@@ -1,6 +1,14 @@
+using NADI.Core.Interfaces;
+using NADI.Core.Models;
+
 namespace NADI.Core.Services;
 
-// Rule engine deterministik untuk F-06 Climate Action Recommendation (PRD §10).
-public class RecommendationEngine
+public class RecommendationEngine : IRecommendationEngine
 {
+    public Task<IEnumerable<ClimateActionRecommendation>> GenerateRecommendation(
+        IEnumerable<ClimateData> climateData, IEnumerable<ClimateTrend> trends, Region region)
+    {
+        var recommendations = new List<ClimateActionRecommendation>();
+        return Task.FromResult<IEnumerable<ClimateActionRecommendation>>(recommendations);
+    }
 }
