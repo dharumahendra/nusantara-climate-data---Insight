@@ -111,8 +111,11 @@ public sealed class AsistenDemo : AsistenIklim
                   $"{Format.Nilai(Indikator.SuhuRataRata, Math.Abs(suhu.SlopePerDekade))} per dekade.";
             string kalimat2 = panas.Arah == "Stabil"
                 ? " Jumlah hari panas per tahun relatif stabil."
-                : $" Jumlah hari panas cenderung {Narasi.ArahKata(panas)} " +
-                  $"{Format.Nilai(Indikator.HariPanas, Math.Abs(panas.PerubahanTotal))} selama periode yang sama.";
+                // Perubahan garis tren bisa lebih besar dari nilai tahun terakhir bila kenaikannya
+                // tidak lurus, jadi sebut asal angkanya dan beri nilai tahun terakhir sebagai pembanding.
+                : $" Menurut garis tren, jumlah hari panas per tahun cenderung {Narasi.ArahKata(panas)} sekitar " +
+                  $"{Format.Nilai(Indikator.HariPanas, Math.Abs(panas.PerubahanTotal))} dari awal hingga akhir periode; " +
+                  $"pada {p.TahunAkhir} tercatat {Format.Nilai(Indikator.HariPanas, p.Terakhir(Indikator.HariPanas))}.";
             return kalimat1 + kalimat2 + Ragu(suhu);
         }
 

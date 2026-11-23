@@ -36,6 +36,12 @@ public abstract class AsistenIklim
     // true bila jawaban benar-benar berasal dari model AI (bukan template).
     public abstract bool MemakaiAi { get; }
 
+    // Siapa yang benar-benar menyusun penjelasan terakhir. Bawaannya sama dengan Nama;
+    // subclass yang bisa jatuh ke template (AsistenGemini) meng-override agar label jujur.
+    public virtual string SumberPenjelasanTerakhir => Nama;
+
+    public virtual bool PenjelasanTerakhirDariAi => MemakaiAi;
+
     public int JumlahPermintaan => jumlahPermintaan;
 
     // Template method: urutan langkahnya sama untuk semua asisten, isi

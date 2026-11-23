@@ -168,7 +168,8 @@ public sealed class InsightForm : FormDasar
             kotak.Controls.Add(BuatParagraf(hasil.Teks, LebarKonten - 50));
 
             Label sumber = BuatCatatan(
-                "Penjelasan dibuat AI berdasarkan angka yang dihitung aplikasi. Angka bersumber dari " +
+                (hasil.DariAi ? "Penjelasan dibuat AI" : "Penjelasan disusun") +
+                " berdasarkan angka yang dihitung aplikasi. Angka bersumber dari " +
                 "ERA5/Open-Meteo. Disusun oleh: " + hasil.Sumber +
                 (hasil.DariAi ? "." : " — teks disusun dari template NADI, bukan oleh model AI."), LebarKonten - 50);
             sumber.Margin = new Padding(0, 8, 0, 0);
@@ -210,7 +211,10 @@ public sealed class InsightForm : FormDasar
     {
         if (permintaanAi is not { } p) return;
 
-        penjelasanAi[(p.Wilayah, p.Indikator)] = (teks, asisten.Nama, asisten.MemakaiAi);
+        // Sumber diambil dari penjelasan yang baru selesai, bukan dari nama asisten: bila Gemini
+        // gagal dan jawaban jatuh ke mode demo, label "Disusun oleh" harus menyebut mode demo.
+        penjelasanAi[(p.Wilayah, p.Indikator)] =
+            (teks, asisten.SumberPenjelasanTerakhir, asisten.PenjelasanTerakhirDariAi);
         permintaanAi = null;
 
         if (StatusAplikasi.Profil is { } profil)
