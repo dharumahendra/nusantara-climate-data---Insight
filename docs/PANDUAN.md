@@ -101,7 +101,8 @@ Menampilkan 3–5 kartu rekomendasi. Rekomendasi dipilih oleh **aturan tetap** d
   2. Tempel di kotak, tekan **Uji Koneksi**, lalu **Simpan**.
   3. Agar tidak perlu mengetik ulang, isi `Gemini` → `ApiKey` di `appsettings.local.json` (bukan `appsettings.example.json`; berkas contoh tidak dibaca aplikasi).
   - Tanpa key, aplikasi memakai **mode demo** (jawaban dari template; banner kuning menandainya).
-  - Aplikasi mencoba `gemini-2.5-flash` lebih dulu, lalu `gemini-flash-latest` bila model pertama sibuk atau tidak membalas (maksimal 20 detik per model).
+  - Aplikasi mencoba `gemini-3.5-flash`, lalu `gemini-flash-latest`, lalu `gemini-flash-lite-latest` bila model sebelumnya tidak tersedia, sibuk, kuotanya habis, atau tidak membalas. Bila ketiganya gagal, aplikasi menanyakan ke Google model *flash* lain yang tersedia untuk key tersebut. Batas tunggu 15 detik per model dan 30 detik total.
+  - Bila semua model gagal, pesan menyebut alasan tiap model, misalnya "tidak tersedia untuk key ini (404)" atau "sedang sibuk (503)".
   - Bila Gemini tidak bisa dihubungi, jawaban otomatis memakai mode demo dan ada catatan alasannya.
 - **Database PostgreSQL**: tombol **Uji Koneksi Database** menampilkan status dan jumlah wilayah/data tersimpan.
 - **Data & Riwayat**: ganti wilayah atau hapus semua riwayat chat.
