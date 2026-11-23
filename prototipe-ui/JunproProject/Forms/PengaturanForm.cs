@@ -106,14 +106,11 @@ public sealed class PengaturanForm : FormDasar
         Button hapusChat = BuatTombolSekunder("Hapus Semua Riwayat Chat", 230, 38);
         hapusChat.Click += (s, e) =>
         {
-            DialogResult jawab = MessageBox.Show(
-                "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (jawab != DialogResult.Yes) return;
+            if (!DialogNadi.Konfirmasi(this, "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat"))
+                return;
 
             StatusAplikasi.HapusSemuaRiwayatChat();
-            MessageBox.Show("Riwayat chat telah dihapus.", "Informasi NADI",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogNadi.Info(this, "Riwayat chat telah dihapus.", "Informasi NADI");
         };
         kolom.Controls.Add(BuatBaris(8, ganti, hapusChat));
 
