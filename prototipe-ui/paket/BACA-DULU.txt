@@ -1,0 +1,37 @@
+NADI - Nusantara Climate Data & Insight  (versi 1.0.0)
+=======================================================
+
+Aplikasi desktop Windows yang mengubah data iklim historis Indonesia menjadi
+grafik, penjelasan, dan rekomendasi aksi iklim.
+
+KEBUTUHAN
+  - Windows 10/11 (64-bit). Tidak perlu memasang .NET.
+  - Koneksi internet untuk mengunduh data iklim pertama kali tiap wilayah.
+  - PostgreSQL (opsional, disarankan). Tanpa PostgreSQL, aplikasi tetap
+    berjalan, tetapi data dan riwayat chat hilang saat aplikasi ditutup.
+
+LANGKAH CEPAT
+  1. (Sekali saja, bila memakai PostgreSQL) klik ganda: siapkan-database.bat
+     Isi password PostgreSQL Anda. Skrip membuat database + tabel dan menulis
+     appsettings.local.json otomatis.
+  2. Klik ganda: NADI.exe
+  3. Pilih wilayah, tekan "Tampilkan Data".
+
+ISI PAKET
+  NADI.exe                    aplikasi (satu berkas, sudah memuat runtime .NET)
+  siapkan-database.bat/.ps1   penyiapan database otomatis
+  database\schema.sql         skema database (bila ingin dijalankan manual)
+  appsettings.example.json    contoh konfigurasi
+  PANDUAN.md                  panduan penggunaan lengkap
+
+CATATAN
+  - appsettings.local.json memuat password dan API key. Jangan dibagikan.
+  - Fitur AI memakai API key Google Gemini (opsional). Tanpa key, aplikasi
+    memakai jawaban mode demo.
+  - Isi API key di Pengaturan, atau di appsettings.local.json (Gemini > ApiKey).
+    JANGAN di appsettings.example.json: berkas itu hanya contoh dan tidak dibaca.
+  - Bila ada dua versi PostgreSQL di komputer (mis. port 5432 dan 5433), jalankan
+    siapkan-database.ps1 dengan -Port sesuai versi yang dipakai.
+  - NADI adalah aplikasi edukasi. Data bersumber dari ERA5 melalui Open-Meteo
+    dan dapat berbeda dari pengamatan stasiun resmi. Untuk informasi dan
+    peringatan resmi, rujuk BMKG.

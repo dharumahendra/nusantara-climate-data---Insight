@@ -105,7 +105,7 @@ Fitur AI Climate Explainer (F-04) dan AI Climate Chat (F-05) membutuhkan API key
 
 ## Database PostgreSQL (prototipe WinForms)
 
-Prototipe di `prototipe-ui/JunproProject` membaca daftar wilayah dan menyimpan riwayat chat di PostgreSQL. Tanpa database, aplikasi tetap berjalan memakai daftar wilayah bawaan dan riwayat chat di memori.
+Prototipe di `prototipe-ui/JunproProject` membaca daftar wilayah, menyimpan riwayat chat, dan menyimpan data iklim harian hasil unduhan Open-Meteo di PostgreSQL. Tanpa database, aplikasi tetap berjalan memakai daftar wilayah bawaan; riwayat chat dan data iklim hanya disimpan di memori selama aplikasi terbuka.
 
 1. Buat database dan tabelnya (skrip aman dijalankan ulang):
 
@@ -116,6 +116,30 @@ Prototipe di `prototipe-ui/JunproProject` membaca daftar wilayah dan menyimpan r
 
 2. Salin `appsettings.example.json` menjadi `appsettings.local.json` di root repo, lalu isi `ConnectionStrings.Nadi` dengan password PostgreSQL Anda.
 3. Jalankan aplikasi, lalu buka **Pengaturan** → **Uji Koneksi Database**.
+
+> **Database lama (Modul 8)?** Jalankan `schema.sql` sekali lagi. Skrip akan menambahkan kolom koordinat (`latitude`, `longitude`) dan tabel `data_iklim_harian`, tanpa menghapus riwayat chat yang sudah ada.
+
+### Data iklim dari Open-Meteo
+
+Saat pengguna menekan **Tampilkan Data**, aplikasi mengunduh data harian 1991 sampai akhir tahun kalender penuh terakhir dari [Open-Meteo](https://open-meteo.com/) (tanpa API key), menghitung statistik 30 tahun terakhir dengan baseline normal 1991–2020, lalu menyimpannya ke tabel `data_iklim_harian`. Wilayah yang sudah tersimpan dibuka dari database tanpa internet.
+
+Open-Meteo membatasi jumlah permintaan per menit, jam, dan hari untuk pemakaian gratis. Bila batas tercapai, aplikasi menampilkan pesan agar menunggu lalu menekan **Coba Lagi**; wilayah yang sudah tersimpan tetap bisa dibuka.
+
+### Menjalankan unit test prototipe
+
+```bash
+dotnet test prototipe-ui/JunproProject.Tests
+```
+
+Test memakai respons API asli yang disimpan di `prototipe-ui/JunproProject.Tests/Fixtures`, sehingga tidak membutuhkan internet maupun database.
+
+### Membuat paket rilis (`NADI.exe`)
+
+```powershell
+.\prototipe-ui\buat-paket.ps1
+```
+
+Skrip ini menghasilkan folder `dist\NADI\` (satu `NADI.exe` mandiri tanpa perlu .NET, skrip `siapkan-database`, skema, contoh konfigurasi, dan panduan) serta `dist\NADI-v1.0.0-win-x64.zip`. Folder `dist/` tidak ikut di-commit, dan paket tidak pernah membawa `appsettings.local.json` milik pengembang. Panduan pemakaian untuk pengguna ada di [`docs/PANDUAN.md`](docs/PANDUAN.md).
 
 ## Database
 

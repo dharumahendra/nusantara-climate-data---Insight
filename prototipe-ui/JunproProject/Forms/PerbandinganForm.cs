@@ -12,6 +12,10 @@ public sealed class PerbandinganForm : FormDasar
     private Wilayah? wilayahA;
     private Wilayah? wilayahB;
     private Indikator indikator = Indikator.SuhuRataRata;
+    private bool sedangMemuat;
+    private string teksProgres = "";
+    private string? pesanGalat;
+    private Label? lblProgres;
 
     public PerbandinganForm() : base("Perbandingan Wilayah")
     {
@@ -19,6 +23,7 @@ public sealed class PerbandinganForm : FormDasar
 
     protected override void BangunKonten(FlowLayoutPanel kolom)
     {
+        lblProgres = null;
         kolom.Controls.Add(BuatLabel("Perbandingan Wilayah", 24, true));
         kolom.Controls.Add(BuatLabel(
             "Bandingkan kondisi iklim dua wilayah pada periode yang sama", 11, false, Tema.Teks));
@@ -63,7 +68,7 @@ public sealed class PerbandinganForm : FormDasar
             wilayahA = (Wilayah)cmbA.SelectedItem!;
             wilayahB = (Wilayah)cmbB.SelectedItem!;
             indikator = pilihanIndikator[cmbIndikator.SelectedIndex];
-            BangunUlang();
+            MuatPasangan();
         };
 
         FlowLayoutPanel filter = new FlowLayoutPanel
@@ -81,22 +86,38 @@ public sealed class PerbandinganForm : FormDasar
         kolom.Controls.Add(peringatan);
 
         // --- Hasil ---
-        ProfilIklim pa = DataIklim.Profil(a);
-        ProfilIklim pb = DataIklim.Profil(b);
+        if (DataIklim.CobaProfil(a) is not { } profilA || DataIklim.CobaProfil(b) is not { } profilB)
+        {
+            TampilkanKeadaanMuat(kolom);
+            return;
+        }
+
+        // Hanya tahun yang valid di kedua wilayah yang dibandingkan (AC-03.4).
+        int[] tahunSama = profilA.Tahun.Intersect(profilB.Tahun).ToArray();
+        if (tahunSama.Length == 0)
+        {
+            kolom.Controls.Add(BuatKeadaanKosong("Tidak ada tahun yang bisa dibandingkan",
+                "Kedua wilayah tidak punya tahun valid yang sama, sehingga perbandingan tidak dapat ditampilkan."));
+            return;
+        }
+        ProfilIklim pa = profilA.Batasi(tahunSama);
+        ProfilIklim pb = profilB.Batasi(tahunSama);
         Indikator ind = indikator;
 
         kolom.Controls.Add(BuatJudulBagian($"{Format.NamaIndikator(ind)}: {a.Kota} vs {b.Kota}"));
         kolom.Controls.Add(BuatCatatan(
-            $"Periode {pa.Periode} — hanya tahun yang valid di kedua wilayah. Data ilustrasi."));
+            $"Periode {pa.Periode} — hanya tahun yang valid di kedua wilayah ({tahunSama.Length} tahun). " +
+            "Sumber: ERA5 via Open-Meteo."));
 
         GrafikGarisPanel grafik = new GrafikGarisPanel(
             pa.Tahun,
             new[]
             {
-                new SeriGrafik(a.Kota, pa.Nilai(ind), Tema.Teal),
-                new SeriGrafik(b.Kota, pb.Nilai(ind), Tema.Oranye, PutusPutus: true),
+                new SeriGrafik(a.Kota, pa.Nilai(ind), Tema.Teal, Baseline: pa.Baseline(ind)),
+                new SeriGrafik(b.Kota, pb.Nilai(ind), Tema.Oranye, PutusPutus: true, Baseline: pb.Baseline(ind)),
             },
             v => Format.Nilai(ind, v),
+            v => Format.Perubahan(ind, v),
             Format.PolaSumbu(ind),
             tampilkanTren: false)
         {
@@ -116,6 +137,71 @@ public sealed class PerbandinganForm : FormDasar
         Button insight = BuatTombol("Lihat Climate Insight", 200, 40);
         insight.Click += (s, e) => Pindah<InsightForm>();
         kolom.Controls.Add(BuatBaris(18, insight, dashboard));
+    }
+
+    // Belum diminta / sedang diunduh / gagal: ketiganya ditangani tanpa memblokir form (PRD §13).
+    private void TampilkanKeadaanMuat(FlowLayoutPanel kolom)
+    {
+        if (sedangMemuat)
+        {
+            FlowLayoutPanel kotak = BuatKotak();
+            kotak.Padding = new Padding(26, 22, 26, 22);
+            kotak.Controls.Add(BuatLabel("Memuat data kedua wilayah…", 14, true));
+            lblProgres = BuatParagraf(teksProgres, LebarKonten - 60);
+            kotak.Controls.Add(lblProgres);
+            kolom.Controls.Add(kotak);
+        }
+        else if (pesanGalat != null)
+        {
+            kolom.Controls.Add(BuatKeadaanKosong("Perbandingan belum dapat ditampilkan", pesanGalat,
+                "Coba Lagi", () => MuatPasangan()));
+        }
+        else
+        {
+            kolom.Controls.Add(BuatKeadaanKosong("Pilih dua wilayah untuk dibandingkan",
+                "Tentukan Wilayah A, Wilayah B, dan indikator di atas, lalu tekan Bandingkan. " +
+                "Data wilayah yang belum pernah dibuka akan diunduh lebih dulu."));
+        }
+    }
+
+    private async void MuatPasangan()
+    {
+        if (sedangMemuat || wilayahA is not { } a || wilayahB is not { } b) return;
+
+        pesanGalat = null;
+
+        if (DataIklim.SudahDimuat(a) && DataIklim.SudahDimuat(b))
+        {
+            BangunUlang();
+            return;
+        }
+
+        sedangMemuat = true;
+        teksProgres = "Memulai…";
+        BangunUlang();
+
+        try
+        {
+            Progress<string> progres = new(teks =>
+            {
+                teksProgres = teks;
+                if (lblProgres is { IsDisposed: false }) lblProgres.Text = teks;
+            });
+
+            // Kedua wilayah diunduh bersamaan; yang sudah tersimpan langsung selesai.
+            await Task.WhenAll(DataIklim.MuatAsync(a, progres), DataIklim.MuatAsync(b, progres));
+        }
+        catch (SumberDataException ex)
+        {
+            pesanGalat = ex.PesanPengguna;
+        }
+        catch (Exception ex)
+        {
+            pesanGalat = "Terjadi kesalahan saat memuat data: " + ex.Message;
+        }
+
+        sedangMemuat = false;
+        if (!IsDisposed) BangunUlang();
     }
 
     private static Control BuatTabel(ProfilIklim a, ProfilIklim b)

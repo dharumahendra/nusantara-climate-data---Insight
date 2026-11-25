@@ -11,6 +11,8 @@
     <!-- Ukuran kontrol ditulis dalam piksel 96 DPI; biarkan Windows yang
          menskalakan di layar 125%/150% agar teks tidak terpotong. -->
     <ApplicationHighDpiMode>DpiUnawareGdiScaled</ApplicationHighDpiMode>
+    <Product>NADI - Nusantara Climate Data &amp; Insight</Product>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,11 +20,13 @@
   </ItemGroup>
 
   <!-- Connection string PostgreSQL dibaca dari appsettings.local.json di root
-       repo (tidak di-commit, PRD §11.5); disalin ke folder output bila ada. -->
+       repo (tidak di-commit, PRD §11.5); disalin ke folder output bila ada.
+       Hanya untuk build Debug: paket Release tidak boleh membawa rahasia lokal
+       (password database, API key) milik pengembang. -->
   <ItemGroup>
     <None Include="..\..\appsettings.local.json" Link="appsettings.local.json"
           CopyToOutputDirectory="PreserveNewest"
-          Condition="Exists('..\..\appsettings.local.json')" />
+          Condition="'$(Configuration)' == 'Debug' And Exists('..\..\appsettings.local.json')" />
   </ItemGroup>
 
 </Project>

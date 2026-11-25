@@ -152,7 +152,7 @@ public sealed class ChatForm : FormDasar
             Padding = new Padding(12, 8, 12, 8),
             Margin = new Padding(0),
             Font = Tema.Huruf(10),
-            BackColor = dariPengguna ? Tema.Teal : Tema.GelembungAi,
+            BackColor = dariPengguna ? Tema.TealTeks : Tema.GelembungAi,
             ForeColor = dariPengguna ? Tema.Putih : Tema.Teks,
             Text = isi
         };
@@ -225,10 +225,8 @@ public sealed class ChatForm : FormDasar
     {
         if (permintaan != null || StatusAplikasi.RiwayatChat(wilayah).Count == 0) return;
 
-        DialogResult jawab = MessageBox.Show(
-            $"Hapus seluruh riwayat chat untuk {wilayah.Kota}?",
-            "Hapus Riwayat", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        if (jawab != DialogResult.Yes) return;
+        if (!DialogNadi.Konfirmasi(this, $"Hapus seluruh riwayat chat untuk {wilayah.Kota}?", "Hapus Riwayat"))
+            return;
 
         StatusAplikasi.HapusRiwayatChat(wilayah);
         BangunUlang();

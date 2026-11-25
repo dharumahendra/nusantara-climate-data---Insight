@@ -73,8 +73,9 @@ public sealed class PengaturanForm : FormDasar
         kolom.Controls.Add(BuatBaris(12, simpan, uji));
         kolom.Controls.Add(lblStatus);
         kolom.Controls.Add(BuatCatatan(
-            "Pada prototipe ini API key hanya disimpan di memori (field private AsistenGemini) dan tidak pernah " +
-            "ditulis ke log. Versi akhir menyimpannya di file konfigurasi lokal yang tidak ikut di-commit."));
+            "API key yang diketik di sini hanya disimpan di memori (field private AsistenGemini) selama aplikasi " +
+            "terbuka dan tidak pernah ditulis ke log. Agar tidak perlu mengetik ulang, isi Gemini:ApiKey di " +
+            "appsettings.local.json (file ini tidak ikut di-commit)."));
 
         // --- Database ---
         kolom.Controls.Add(BuatJudulBagian("Database PostgreSQL"));
@@ -105,14 +106,11 @@ public sealed class PengaturanForm : FormDasar
         Button hapusChat = BuatTombolSekunder("Hapus Semua Riwayat Chat", 230, 38);
         hapusChat.Click += (s, e) =>
         {
-            DialogResult jawab = MessageBox.Show(
-                "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (jawab != DialogResult.Yes) return;
+            if (!DialogNadi.Konfirmasi(this, "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat"))
+                return;
 
             StatusAplikasi.HapusSemuaRiwayatChat();
-            MessageBox.Show("Riwayat chat telah dihapus.", "Informasi NADI",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            DialogNadi.Info(this, "Riwayat chat telah dihapus.", "Informasi NADI");
         };
         kolom.Controls.Add(BuatBaris(8, ganti, hapusChat));
 
@@ -120,7 +118,7 @@ public sealed class PengaturanForm : FormDasar
         kolom.Controls.Add(BuatJudulBagian("Tentang NADI"));
         kolom.Controls.Add(BuatParagraf(
             "NADI (Nusantara Climate Data & Insight) membantu membaca data iklim historis Indonesia, " +
-            "memahami artinya, dan memulai aksi iklim. Versi ini adalah prototipe antarmuka dengan data ilustrasi."));
+            "memahami artinya, dan memulai aksi iklim. Data iklim diambil dari Open-Meteo (reanalisis ERA5) untuk 30 tahun kalender penuh terakhir, dengan baseline normal 1991–2020."));
 
         FlowLayoutPanel kotakDisclaimer = BuatKotak(Tema.Oranye, Tema.KuningMuda);
         kotakDisclaimer.Margin = new Padding(0, 10, 0, 0);

@@ -11,7 +11,8 @@ public enum Indikator
     HariHujanLebat
 }
 
-public sealed record Wilayah(string Provinsi, string Kota, double SuhuNormal, double HujanNormal)
+// Satu titik koordinat yang mewakili pusat kota/kabupaten (PRD §6.1).
+public sealed record Wilayah(string Provinsi, string Kota, double Latitude, double Longitude)
 {
     public string NamaLengkap => Kota + ", " + Provinsi;
 
@@ -28,27 +29,50 @@ public sealed record HasilTren(double Slope, double Intersep, double RSquared,
 
 public sealed class ProfilIklim
 {
-    private readonly Dictionary<Indikator, double[]> deret;
+    // PRD §15 E-04: di bawah ini garis tren disembunyikan karena data belum cukup.
+    public const int MinTahunUntukTren = 10;
 
-    public ProfilIklim(Wilayah wilayah, int[] tahun, Dictionary<Indikator, double[]> deret)
+    private readonly Dictionary<Indikator, double[]> deret;
+    private readonly Dictionary<Indikator, double> baseline;
+
+    public ProfilIklim(Wilayah wilayah, int[] tahun, Dictionary<Indikator, double[]> deret,
+                       Dictionary<Indikator, double> baseline, double ambangHariPanas,
+                       int[] tahunTidakValid, int jumlahTahunPeriode)
     {
         Wilayah = wilayah;
         Tahun = tahun;
         this.deret = deret;
+        this.baseline = baseline;
+        AmbangHariPanas = ambangHariPanas;
+        TahunTidakValid = tahunTidakValid;
+        JumlahTahunPeriode = jumlahTahunPeriode;
     }
 
     public Wilayah Wilayah { get; }
+
+    // Hanya tahun valid (PRD §6.1); semua deret nilai sejajar dengan array ini.
     public int[] Tahun { get; }
+    public int[] TahunTidakValid { get; }
+    public int JumlahTahunPeriode { get; }
+    public double AmbangHariPanas { get; }
+
     public int TahunAwal => Tahun[0];
     public int TahunAkhir => Tahun[^1];
     public string Periode => TahunAwal + "–" + TahunAkhir;
+    public bool TrenTersedia => Tahun.Length >= MinTahunUntukTren;
 
     public double[] Nilai(Indikator i) => deret[i];
     public double RataRata(Indikator i) => deret[i].Average();
     public double Terakhir(Indikator i) => deret[i][^1];
 
+    // Rata-rata normal 1991-2020 untuk indikator ini; null bila baseline tidak tersedia.
+    public double? Baseline(Indikator i) => baseline.TryGetValue(i, out double nilai) ? nilai : null;
+
+    // Anomali = nilai tahun - nilai baseline (PRD §6.1). Positif = di atas normal.
+    public double? Anomali(Indikator i, double nilai) => Baseline(i) is double b ? nilai - b : null;
+
     public HasilTren Tren(Indikator i) =>
-        DataIklim.HitungTren(Tahun, deret[i], DataIklim.AmbangStabil(i, RataRata(i)));
+        DataIklim.HitungTren(Tahun, deret[i], DataIklim.AmbangStabil(i, Baseline(i) ?? RataRata(i)));
 
     public (int Tahun, double Nilai) Tertinggi(Indikator i)
     {
@@ -61,49 +85,63 @@ public sealed class ProfilIklim
         int idx = Array.IndexOf(deret[i], deret[i].Min());
         return (Tahun[idx], deret[i][idx]);
     }
+
+    // Profil yang dibatasi ke tahun tertentu saja; dipakai perbandingan agar hanya
+    // tahun yang valid di kedua wilayah yang dibandingkan (PRD AC-03.4).
+    public ProfilIklim Batasi(IReadOnlyCollection<int> tahunDipakai)
+    {
+        int[] indeks = Enumerable.Range(0, Tahun.Length).Where(i => tahunDipakai.Contains(Tahun[i])).ToArray();
+        if (indeks.Length == 0)
+            throw new ArgumentException("Tidak ada tahun yang cocok.", nameof(tahunDipakai));
+
+        Dictionary<Indikator, double[]> baru = deret.ToDictionary(
+            p => p.Key, p => indeks.Select(i => p.Value[i]).ToArray());
+
+        return new ProfilIklim(Wilayah, indeks.Select(i => Tahun[i]).ToArray(), baru, baseline,
+                               AmbangHariPanas, TahunTidakValid, JumlahTahunPeriode);
+    }
 }
 
-// Sumber data ilustrasi untuk prototipe UI. Deret tahunan dibangkitkan dari
-// nilai normal tiap wilayah + tren + variasi acak dengan seed tetap, sehingga
-// wilayah yang sama selalu menghasilkan angka yang sama. Nantinya diganti
-// data asli Open-Meteo (PRD §8).
+// Daftar wilayah dan cache profil iklim yang sudah dimuat. Data diambil dari
+// Open-Meteo (PRD §8) dan disimpan ke PostgreSQL bila tersedia, sehingga
+// wilayah yang pernah diunduh bisa dibuka lagi tanpa internet (PRD D-06).
 public static class DataIklim
 {
-    public const int TahunAwal = 1995;
-    public const int TahunAkhir = 2024;
-
     // Daftar bawaan, dipakai bila database PostgreSQL tidak tersedia. Isinya
     // sama dengan data awal di Database/schema.sql. Minimal satu wilayah dari
     // tiap pulau besar agar perbandingan bermakna (PRD §8.4).
     private static readonly Wilayah[] wilayahBawaan =
     {
-        new("DI Yogyakarta", "Kota Yogyakarta", 26.8, 2100),
-        new("DI Yogyakarta", "Sleman", 26.3, 2400),
-        new("DI Yogyakarta", "Bantul", 26.9, 1900),
-        new("DKI Jakarta", "Jakarta Pusat", 28.0, 1850),
-        new("DKI Jakarta", "Jakarta Selatan", 27.6, 2100),
-        new("DKI Jakarta", "Jakarta Utara", 28.3, 1700),
-        new("Jawa Barat", "Bandung", 23.6, 2300),
-        new("Jawa Barat", "Bogor", 25.4, 3900),
-        new("Jawa Barat", "Bekasi", 27.8, 1900),
-        new("Jawa Tengah", "Semarang", 27.9, 2200),
-        new("Jawa Tengah", "Surakarta", 27.1, 2100),
-        new("Jawa Tengah", "Magelang", 25.2, 2700),
-        new("Bali", "Denpasar", 27.6, 1700),
-        new("Bali", "Badung", 27.4, 1800),
-        new("Bali", "Gianyar", 26.5, 2200),
-        new("Sumatera Utara", "Medan", 27.2, 2200),
-        new("Kalimantan Timur", "Samarinda", 27.3, 2400),
-        new("Kalimantan Timur", "Balikpapan", 27.1, 2700),
-        new("Sulawesi Selatan", "Makassar", 27.5, 2900),
-        new("Nusa Tenggara Timur", "Kupang", 27.8, 1400),
-        new("Maluku", "Ambon", 26.6, 3400),
-        new("Papua", "Jayapura", 27.4, 2500),
+        new("DI Yogyakarta", "Kota Yogyakarta", -7.7956, 110.3695),
+        new("DI Yogyakarta", "Sleman", -7.7167, 110.3550),
+        new("DI Yogyakarta", "Bantul", -7.8881, 110.3289),
+        new("DKI Jakarta", "Jakarta Pusat", -6.1862, 106.8342),
+        new("DKI Jakarta", "Jakarta Selatan", -6.2615, 106.8106),
+        new("DKI Jakarta", "Jakarta Utara", -6.1384, 106.8636),
+        new("Jawa Barat", "Bandung", -6.9175, 107.6191),
+        new("Jawa Barat", "Bogor", -6.5971, 106.8060),
+        new("Jawa Barat", "Bekasi", -6.2383, 106.9756),
+        new("Jawa Tengah", "Semarang", -6.9667, 110.4167),
+        new("Jawa Tengah", "Surakarta", -7.5755, 110.8243),
+        new("Jawa Tengah", "Magelang", -7.4797, 110.2177),
+        new("Bali", "Denpasar", -8.6705, 115.2126),
+        new("Bali", "Badung", -8.5819, 115.1770),
+        new("Bali", "Gianyar", -8.5389, 115.3258),
+        new("Sumatera Utara", "Medan", 3.5952, 98.6722),
+        new("Kalimantan Timur", "Samarinda", -0.5022, 117.1536),
+        new("Kalimantan Timur", "Balikpapan", -1.2379, 116.8529),
+        new("Sulawesi Selatan", "Makassar", -5.1477, 119.4327),
+        new("Nusa Tenggara Timur", "Kupang", -10.1772, 123.6070),
+        new("Maluku", "Ambon", -3.6954, 128.1814),
+        new("Papua", "Jayapura", -2.5337, 140.7181),
     };
 
     private static readonly Dictionary<Wilayah, ProfilIklim> tersimpan = new();
 
     public static Wilayah[] SemuaWilayah { get; private set; } = wilayahBawaan;
+
+    // Klien yang dipakai MuatAsync; dapat diganti (mis. saat pengujian).
+    public static OpenMeteoKlien Klien { get; set; } = OpenMeteoKlien.Bawaan;
 
     // Dipanggil saat start-up bila daftar wilayah berhasil dibaca dari database.
     public static void GunakanDaftarWilayah(Wilayah[] daftar)
@@ -121,16 +159,75 @@ public static class DataIklim
     public static Wilayah? Cari(string provinsi, string kota) =>
         SemuaWilayah.FirstOrDefault(w => w.Provinsi == provinsi && w.Kota == kota);
 
-    public static bool SudahTersimpan(Wilayah w) => tersimpan.ContainsKey(w);
+    public static Wilayah? CariKota(string kota) =>
+        SemuaWilayah.FirstOrDefault(w => string.Equals(w.Kota, kota.Trim(), StringComparison.OrdinalIgnoreCase));
 
-    public static ProfilIklim Profil(Wilayah w)
+    public static bool SudahDimuat(Wilayah w) => tersimpan.ContainsKey(w);
+
+    public static ProfilIklim? CobaProfil(Wilayah w) => tersimpan.GetValueOrDefault(w);
+
+    // Hanya untuk wilayah yang sudah dimuat lewat MuatAsync.
+    public static ProfilIklim Profil(Wilayah w) =>
+        CobaProfil(w) ?? throw new InvalidOperationException(
+            $"Data {w.NamaLengkap} belum dimuat. Panggil DataIklim.MuatAsync() lebih dulu.");
+
+    // Alur PRD §7: memori -> database lokal -> Open-Meteo. Data dari internet
+    // langsung disimpan agar tidak perlu diunduh ulang (PRD D-06).
+    public static async Task<ProfilIklim> MuatAsync(Wilayah wilayah, IProgress<string>? progres = null,
+                                                    CancellationToken ct = default)
     {
-        if (!tersimpan.TryGetValue(w, out ProfilIklim? profil))
+        if (tersimpan.TryGetValue(wilayah, out ProfilIklim? sudahAda)) return sudahAda;
+
+        DateOnly hariIni = DateOnly.FromDateTime(DateTime.Today);
+        var (tahunAwal, tahunAkhir) = AnalisisIklim.Periode(hariIni);
+        var (awal, akhir) = AnalisisIklim.RentangUnduh(hariIni);
+        PenyimpananIklim? penyimpanan = StatusAplikasi.PenyimpananIklim;
+
+        DataHarian? data = null;
+        if (penyimpanan != null)
         {
-            profil = Bangkitkan(w);
-            tersimpan[w] = profil;
+            progres?.Report($"Memeriksa data {wilayah.Kota} yang tersimpan…");
+            data = await CobaDatabaseAsync(() => penyimpanan.Ambil(wilayah, awal, akhir));
         }
+
+        if (data == null)
+        {
+            progres?.Report($"Mengunduh data iklim {wilayah.Kota} {tahunAwal}–{tahunAkhir} dari Open-Meteo…");
+            data = await Klien.AmbilHarianAsync(wilayah, awal, akhir, ct);
+
+            if (penyimpanan != null)
+            {
+                progres?.Report("Menyimpan data ke database lokal…");
+                DataHarian untukDisimpan = data;
+                await CobaDatabaseAsync<object?>(() =>
+                {
+                    penyimpanan.Simpan(wilayah, untukDisimpan);
+                    return null;
+                });
+            }
+        }
+
+        progres?.Report("Menghitung statistik dan tren…");
+        DataHarian dataFinal = data;
+        ProfilIklim profil = await Task.Run(() => AnalisisIklim.Bangun(wilayah, dataFinal, tahunAkhir), ct);
+
+        tersimpan[wilayah] = profil;
         return profil;
+    }
+
+    // Database hanya cache: kegagalannya dicatat tetapi tidak boleh menggagalkan
+    // pemuatan data (PRD §12 Ketahanan).
+    private static async Task<T?> CobaDatabaseAsync<T>(Func<T?> kerja)
+    {
+        try
+        {
+            return await Task.Run(kerja);
+        }
+        catch (Exception ex) when (ex is Npgsql.NpgsqlException or InvalidOperationException)
+        {
+            StatusAplikasi.CatatMasalahDatabase("Penyimpanan data iklim bermasalah: " + ex.Message);
+            return default;
+        }
     }
 
     // Ambang perubahan total yang masih dianggap "Stabil" (PRD §6.4).
@@ -166,65 +263,5 @@ public static class DataIklim
         string keyakinan = r2 >= 0.5 ? "Kuat" : r2 >= 0.25 ? "Sedang" : "Lemah";
 
         return new HasilTren(slope, yBar - slope * xBar, r2, total, arah, keyakinan);
-    }
-
-    private static ProfilIklim Bangkitkan(Wilayah w)
-    {
-        Random acak = new Random(HashStabil(w.Kota));
-        int n = TahunAkhir - TahunAwal + 1;
-        double tengah = (n - 1) / 2.0;
-
-        double trenSuhu = 0.010 + acak.NextDouble() * 0.030;    // °C per tahun
-        double trenHujan = -0.007 + acak.NextDouble() * 0.012;  // fraksi per tahun
-        double trenLebat = -0.04 + acak.NextDouble() * 0.12;    // hari per tahun
-
-        int[] tahun = new int[n];
-        double[] suhu = new double[n], maks = new double[n], min = new double[n];
-        double[] hujan = new double[n], panas = new double[n];
-        double[] hariHujan = new double[n], lebat = new double[n];
-
-        for (int i = 0; i < n; i++)
-        {
-            double t = i - tengah;
-            tahun[i] = TahunAwal + i;
-            suhu[i] = Math.Round(w.SuhuNormal + trenSuhu * t + Gangguan(acak) * 0.22, 2);
-            maks[i] = Math.Round(suhu[i] + 7.4 + Gangguan(acak) * 0.45, 2);
-            min[i] = Math.Round(suhu[i] - 6.3 + Gangguan(acak) * 0.45, 2);
-            hujan[i] = Math.Round(w.HujanNormal * (1 + trenHujan * t + Gangguan(acak) * 0.10));
-            panas[i] = Math.Max(0, Math.Round(36 + (suhu[i] - w.SuhuNormal) * 28 + Gangguan(acak) * 4));
-            hariHujan[i] = Math.Round(Math.Clamp(hujan[i] / 14.5 + Gangguan(acak) * 6, 60, 230));
-            lebat[i] = Math.Max(0, Math.Round(hujan[i] / 260 + trenLebat * t + Gangguan(acak) * 1.5));
-        }
-
-        return new ProfilIklim(w, tahun, new Dictionary<Indikator, double[]>
-        {
-            [Indikator.SuhuRataRata] = suhu,
-            [Indikator.SuhuMaksimum] = maks,
-            [Indikator.SuhuMinimum] = min,
-            [Indikator.CurahHujan] = hujan,
-            [Indikator.HariPanas] = panas,
-            [Indikator.HariHujan] = hariHujan,
-            [Indikator.HariHujanLebat] = lebat,
-        });
-    }
-
-    // Variasi acak kira-kira berdistribusi normal (rata-rata 0, simpangan 1).
-    private static double Gangguan(Random acak) =>
-        (acak.NextDouble() + acak.NextDouble() + acak.NextDouble() - 1.5) * 2;
-
-    // string.GetHashCode() berubah setiap aplikasi dijalankan, jadi pakai FNV-1a
-    // supaya angka ilustrasi tetap sama dari sesi ke sesi.
-    private static int HashStabil(string teks)
-    {
-        unchecked
-        {
-            uint hash = 2166136261;
-            foreach (char c in teks)
-            {
-                hash ^= c;
-                hash *= 16777619;
-            }
-            return (int)hash;
-        }
     }
 }

@@ -15,7 +15,8 @@ public sealed class RepositoriWilayah
     public Wilayah[] AmbilSemua()
     {
         using NpgsqlCommand perintah = database.BuatPerintah(
-            "SELECT provinsi, kota, suhu_normal, curah_hujan_normal FROM wilayah ORDER BY id");
+            "SELECT provinsi, kota, latitude, longitude FROM wilayah " +
+            "WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY id");
         using NpgsqlDataReader baris = perintah.ExecuteReader();
 
         List<Wilayah> daftar = new List<Wilayah>();
@@ -23,8 +24,8 @@ public sealed class RepositoriWilayah
             daftar.Add(new Wilayah(
                 Provinsi: baris.GetString(0),
                 Kota: baris.GetString(1),
-                SuhuNormal: (double)baris.GetDecimal(2),
-                HujanNormal: (double)baris.GetDecimal(3)));
+                Latitude: baris.GetDouble(2),
+                Longitude: baris.GetDouble(3)));
 
         return daftar.ToArray();
     }
