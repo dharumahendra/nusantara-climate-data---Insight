@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Junpro_Project</RootNamespace>
     <AssemblyName>NADI</AssemblyName>
+    <ApplicationIcon>Resources\nadi.ico</ApplicationIcon>
     <!-- Ukuran kontrol ditulis dalam piksel 96 DPI; biarkan Windows yang
          menskalakan di layar 125%/150% agar teks tidak terpotong. -->
     <ApplicationHighDpiMode>DpiUnawareGdiScaled</ApplicationHighDpiMode>
