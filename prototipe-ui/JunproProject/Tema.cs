@@ -30,6 +30,24 @@ public static class Tema
 
     public static Font Huruf(float ukuran, FontStyle gaya = FontStyle.Regular) =>
         new Font("Segoe UI", ukuran, gaya);
+
+    // Ikon NADI ikut tertanam di NADI.exe (ApplicationIcon). Dibaca dari berkas exe itu
+    // agar jendela memakai ikon yang sama dengan taskbar; null bila gagal dibaca
+    // sehingga jendela memakai ikon bawaan dan aplikasi tetap berjalan.
+    public static readonly Icon? IkonAplikasi = MuatIkonAplikasi();
+
+    private static Icon? MuatIkonAplikasi()
+    {
+        try
+        {
+            string? exe = Environment.ProcessPath;
+            return exe == null ? null : Icon.ExtractAssociatedIcon(exe);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
 }
 
 // Aturan penyajian angka (PRD §6.5): pemisah desimal koma, ribuan titik.

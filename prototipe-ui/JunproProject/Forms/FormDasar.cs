@@ -27,6 +27,7 @@ public abstract class FormDasar : Form
     protected FormDasar(string judulHalaman)
     {
         Text = "NADI - Climate Data & Insight  |  " + judulHalaman;
+        if (Tema.IkonAplikasi != null) Icon = Tema.IkonAplikasi;
         Size = new Size(1100, 720);
         MinimumSize = new Size(1020, 640);
         StartPosition = FormStartPosition.CenterScreen;

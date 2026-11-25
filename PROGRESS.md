@@ -1,52 +1,50 @@
 # Progress Pengerjaan NADI
 
-**Terakhir diperbarui:** 2026-09-06
+**Terakhir diperbarui:** 2026-11-25
 
-Dokumen ini mencatat progres pengerjaan proyek secara ringkas. Untuk detail scope, rumus, dan acceptance criteria, lihat [`docs/PRD.md`](docs/PRD.md).
+Dokumen ini mencatat progres pengerjaan proyek secara ringkas. Untuk detail scope, rumus, dan acceptance criteria, lihat [`docs/PRD.md`](docs/PRD.md). Cara memakai aplikasi ada di [`docs/PANDUAN.md`](docs/PANDUAN.md).
 
 ## Ringkasan status
 
-Struktur solution (.NET 8, 4 project + test) dan scaffolding awal setiap layer sudah dibuat. Belum ada logika bisnis, UI, integrasi API, atau AI yang diimplementasikan, proyek belum bisa dijalankan sebagai aplikasi fungsional.
+Aplikasi NADI **sudah berjalan** sebagai aplikasi desktop Windows (WinForms, .NET 10) dengan data iklim nyata dari Open-Meteo, penyimpanan di PostgreSQL, dan penjelasan AI lewat Google Gemini (dengan mode demo bila AI tidak tersedia). Aplikasi dikemas menjadi satu berkas `NADI.exe` mandiri, tanpa perlu memasang .NET.
 
-## Sprint 1 Fondasi
-
-Exit criteria (PRD §16): *aplikasi bisa dijalankan, berpindah antar halaman kosong, database terbentuk dan berisi ~40 wilayah, semua anggota bisa build dari clean clone.*
-
-| Tugas | Status | Catatan |
-|---|---|---|
-| Repo, branch strategy, `.gitignore`, README kerangka | ✅ Selesai | `.gitignore` & README lengkap dengan panduan build/run |
-| Solution 4 project + referensi sesuai §7 | ✅ Selesai | `NADI.sln` + `NADI.Core/.Infrastructure/.AI/.App` + `NADI.Tests`, dibuat manual (belum divalidasi `dotnet build` — lihat Risiko) |
-| DI container, navigasi sidebar, tema & resource warna/font | 🔲 Belum | Palet warna (`Resources/Colors.xaml`) sudah ada; DI container, navigasi sidebar, dan `Styles.xaml` masih kosong |
-| EF Core + SQLite + migrasi awal + seed `regions.json` | 🔲 Belum | `NadiDbContext` masih kosong (belum ada `DbSet`), belum ada migrasi; `regions.json` baru berisi 2 dari ~40 wilayah target |
-| 5 wawancara pengguna singkat (validasi asumsi §2) | 🔲 Belum | |
-
-## Sprint 2–6
-
-Belum dimulai. Urutan sesuai roadmap PRD §16: Data & Dashboard → Visualisasi → AI → Climate Action & Polish → Finalisasi.
+Aplikasi yang berjalan berada di [`prototipe-ui/`](prototipe-ui/). Folder `src/` berisi rancangan berlapis (Core, Infrastructure, AI, App) yang dibuat untuk class diagram dan skema database; folder itu belum menjadi aplikasi yang dijalankan.
 
 ## Status fitur
 
-| ID | Fitur | Prioritas | Status |
-|---|---|---|---|
-| F-01 | Climate Location Explorer | P0 | 🔲 Belum dimulai |
-| F-02 | Historical Climate Visualization | P0 | 🔲 Belum dimulai |
-| F-03 | Regional Climate Comparison | P1 | 🔲 Belum dimulai |
-| F-04 | AI Climate Explainer | P0 ⭐ | 🔲 Belum dimulai |
-| F-05 | AI Climate Chat | P1 ⭐ | 🔲 Belum dimulai |
-| F-06 | Climate Action Recommendation | P0 ⭐ | 🔲 Belum dimulai |
-| F-07 | Climate Dashboard | P0 | 🔲 Belum dimulai |
+| ID | Fitur | Prioritas | Status | Halaman |
+|---|---|---|---|---|
+| F-01 | Climate Location Explorer | P0 | ✅ Selesai | Dashboard Explore |
+| F-02 | Historical Climate Visualization | P0 | ✅ Selesai | Climate Insight |
+| F-03 | Regional Climate Comparison | P1 | ✅ Selesai | Perbandingan Wilayah |
+| F-04 | AI Climate Explainer | P0 ⭐ | ✅ Selesai | Climate Insight |
+| F-05 | AI Climate Chat | P1 ⭐ | ✅ Selesai | Chat AI |
+| F-06 | Climate Action Recommendation | P0 ⭐ | ✅ Selesai | Aksi Iklim |
+| F-07 | Climate Dashboard | P0 | ✅ Selesai | Dashboard Explore |
 
-## Yang sudah tersedia di repo
+## Yang sudah dikerjakan
 
-- Solution `.sln` + 5 csproj (`NADI.Core`, `NADI.Infrastructure`, `NADI.AI`, `NADI.App`, `NADI.Tests`) dengan referensi antar-project sesuai aturan §7.
-- Stub kelas/interface kosong untuk `Region`, `ClimateProfile`, `TrendResult`, `IClimateService`, `IAiExplainerService`, `IRecommendationEngine`, `ClimateAnalysisService`, `RecommendationEngine`, `OpenMeteoProvider`, `ClimateRepository`, `NadiDbContext`, `GeminiClient`, `ClimateExplainer`.
-- Template prompt AI (`explainer.v1.txt`, `chat.v1.txt`) sesuai PRD §11.3–§11.4.
-- Shell WPF minimal (`App.xaml`, `MainWindow.xaml` kosong) + palet warna §13.
-- `regions.json` (seed) berisi 2 contoh wilayah.
-- `appsettings.example.json`, `.gitignore` (mengecualikan `appsettings.local.json` dan file database lokal).
+- **Data**: klien Open-Meteo (ERA5), rumus tren dan baseline, data harian disimpan di PostgreSQL.
+- **AI**: Gemini dengan urutan model cadangan dan pencarian model otomatis, batas waktu 15 detik per model dan 30 detik total, serta mode demo yang jujur menyebut sumber jawabannya.
+- **UI**: enam halaman, pemuatan data asinkron, keadaan loading/kosong/error, kontras warna ≥ 4,5:1, layar 125% dan 150%, dialog konfirmasi berbahasa Indonesia, dan ikon aplikasi.
+- **Paket**: `prototipe-ui/buat-paket.ps1` menghasilkan `NADI.exe` mandiri; `siapkan-database.bat` menyiapkan database lokal.
+- **Pengujian**: 129 unit test (xUnit), worksheet black box di [`docs/pengujian-black-box.md`](docs/pengujian-black-box.md), dan uji manual M-01 sampai M-07 (semua Sesuai).
 
-## Risiko / catatan terbuka
+## Belum / sedang dikerjakan
 
-- **Build belum tervalidasi.** File `.sln`/`.csproj` ditulis manual di lingkungan tanpa .NET SDK. Perlu dibuka & dibuild di Visual Studio/Windows untuk memastikan referensi package (LiveCharts2, CommunityToolkit.Mvvm, EF Core Sqlite) resolve dengan benar.
-- **Open Questions PRD §21** (jumlah wilayah, opsi kelembapan, dark mode, dll.) belum dijawab PM.
-- Wawancara validasi asumsi (§2) untuk Sprint 1 belum dilakukan.
+| Pekerjaan | Status | Catatan |
+|---|---|---|
+| Database bukan lokal (cloud) | 🔲 Belum | Syarat pengumpulan akhir. Saat ini aplikasi memakai PostgreSQL di komputer pengguna. |
+| Slide presentasi (PPT) | 🔲 Belum | Maksimal 10 menit. |
+| Video demo | 🔲 Belum | Maksimal 3 menit, hanya demo aplikasi. |
+| ERD dan Use Case Diagram sebagai gambar | 🔲 Belum | ERD baru berupa kode Mermaid di PRD §9. Class diagram sudah ada di README. |
+| Laporan uji manual masuk ke repo | 🔲 Belum | `LAPORAN-UJI-MANUAL.md` dan `pengujian-manual-dharu.md` belum di-commit. |
+
+## Catatan terbuka
+
+- **Font**: aplikasi memakai Segoe UI (bawaan Windows), sedangkan PRD §13 menyebut Poppins dan Inter yang di-embed. Font belum di-embed; Segoe UI tersedia di semua Windows sehingga tampilan tetap konsisten.
+- **Ukuran huruf isi** 10pt (sekitar 13px), sedikit di bawah target PRD ≥ 14px. Terbaca nyaman di layar 125% dan 150%.
+- **Format angka** di penjelasan AI memakai titik desimal ("1.14 °C"), sedangkan kartu aplikasi memakai koma ("+1,1 °C"). Angkanya sama.
+- **Peringatan Windows** "Unknown Publisher" muncul saat `NADI.exe` dari zip pertama kali dibuka (berkas belum ditandatangani).
+- **Wawancara pengguna** (PRD §2) tidak tercatat di repo.
+- **Open Questions PRD §21** belum dijawab secara tertulis.
