@@ -27,7 +27,7 @@ Fitur AI memakai Google Gemini. Bila API key belum diisi atau Gemini tidak dapat
 
 - **Platform:** aplikasi desktop Windows, C# dengan .NET 10 dan Windows Forms
 - **Grafik:** digambar sendiri dengan GDI+ (`GrafikGarisPanel`, `GrafikBatangPanel`)
-- **Database:** PostgreSQL lewat Npgsql
+- **Database:** PostgreSQL 18 di AWS RDS (ap-southeast-1), diakses lewat Npgsql dengan SSL
 - **Sumber data iklim:** [Open-Meteo Historical Weather API](https://open-meteo.com/) (reanalisis ERA5)
 - **AI narasi dan chat:** Google Gemini API (REST)
 - **Pengujian:** xUnit
@@ -123,6 +123,16 @@ Aplikasi membaca daftar wilayah, menyimpan riwayat chat, dan menyimpan data ikli
 
 > **Database lama (Modul 8)?** Jalankan `schema.sql` sekali lagi. Skrip akan menambahkan kolom koordinat (`latitude`, `longitude`) dan tabel `data_iklim_harian`, tanpa menghapus riwayat chat yang sudah ada.
 
+### Database cloud (AWS RDS) untuk paket rilis
+
+Paket yang dikumpulkan memakai PostgreSQL di AWS RDS, bukan database lokal. Aplikasi masuk dengan user `nadi_app` yang haknya dibatasi: hanya `SELECT` pada `wilayah`, serta `SELECT`, `INSERT`, dan `DELETE` pada `pesan_chat` dan `data_iklim_harian`. User ini tidak bisa membuat tabel atau mengubah data wilayah.
+
+Connection string-nya disimpan di `konfigurasi-demo/appsettings.local.json`. Berkas ini tidak di-commit, jadi bagikan secara terpisah. Formatnya:
+
+```
+Host=<endpoint-rds>;Port=5432;Database=nadi;Username=nadi_app;Password=<password>;SSL Mode=Require
+```
+
 ### Data iklim dari Open-Meteo
 
 Saat pengguna menekan **Tampilkan Data**, aplikasi mengunduh data harian 1991 sampai akhir tahun kalender penuh terakhir dari [Open-Meteo](https://open-meteo.com/) (tanpa API key), menghitung statistik 30 tahun terakhir dengan baseline normal 1991–2020, lalu menyimpannya ke tabel `data_iklim_harian`. Wilayah yang sudah tersimpan dibuka dari database tanpa internet.
@@ -133,6 +143,12 @@ Open-Meteo membatasi jumlah permintaan per menit, jam, dan hari untuk pemakaian 
 
 ```powershell
 .\prototipe-ui\buat-paket.ps1
+```
+
+Untuk paket yang langsung tersambung ke database cloud:
+
+```powershell
+.\prototipe-ui\buat-paket.ps1 -KonfigDemo konfigurasi-demo\appsettings.local.json
 ```
 
 Skrip ini menghasilkan folder `dist\NADI\` (satu `NADI.exe` mandiri tanpa perlu .NET, skrip `siapkan-database`, skema, contoh konfigurasi, dan panduan) serta `dist\NADI-v1.0.0-win-x64.zip`. Folder `dist/` tidak ikut di-commit, dan paket tidak pernah membawa `appsettings.local.json` milik pengembang. Panduan pemakaian untuk pengguna ada di [`docs/PANDUAN.md`](docs/PANDUAN.md).
