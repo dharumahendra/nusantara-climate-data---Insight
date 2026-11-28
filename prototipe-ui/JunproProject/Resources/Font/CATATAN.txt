@@ -1,0 +1,5 @@
+Plus Jakarta Sans (https://github.com/tokotype/PlusJakartaSans), SIL Open Font License 1.1 (OFL.txt).
+
+Modifikasi untuk NADI: lebar glyph spasi (U+0020 dan U+00A0) dinaikkan dari 170 menjadi 260 unit,
+karena pada ukuran teks kecil di Windows (GDI, 96 DPI) spasi asli membulat menjadi sekitar 2 piksel
+sehingga kata-kata tampak menempel. Glyph lain tidak diubah.

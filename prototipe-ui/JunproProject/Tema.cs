@@ -63,8 +63,44 @@ public static class Tema
         return Latar;
     }
 
+    // Plus Jakarta Sans ditanam di NADI.exe (desain export.zip, PRD §13). Didaftarkan ke GDI+
+    // (PrivateFontCollection) dan ke GDI (AddFontMemResourceEx), karena label WinForms digambar
+    // lewat GDI. Bila gagal dimuat, aplikasi kembali ke Segoe UI.
+    private static readonly System.Drawing.Text.PrivateFontCollection koleksiFont = new();
+    private static readonly FontFamily? keluargaNadi = MuatFont();
+
+    public static bool FontNadiAktif => keluargaNadi != null;
+
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+    private static extern IntPtr AddFontMemResourceEx(IntPtr data, uint panjang, IntPtr cadangan, ref uint jumlah);
+
+    private static FontFamily? MuatFont()
+    {
+        try
+        {
+            foreach (string nama in new[] { "font-regular", "font-bold" })
+            {
+                using Stream? aliran = typeof(Tema).Assembly.GetManifestResourceStream(nama);
+                if (aliran == null) return null;
+                byte[] data = new byte[aliran.Length];
+                aliran.ReadExactly(data);
+                // Memori sengaja tidak dibebaskan: font dipakai selama aplikasi berjalan.
+                IntPtr ptr = System.Runtime.InteropServices.Marshal.AllocCoTaskMem(data.Length);
+                System.Runtime.InteropServices.Marshal.Copy(data, 0, ptr, data.Length);
+                koleksiFont.AddMemoryFont(ptr, data.Length);
+                uint jumlah = 0;
+                AddFontMemResourceEx(ptr, (uint)data.Length, IntPtr.Zero, ref jumlah);
+            }
+            return koleksiFont.Families.FirstOrDefault();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public static Font Huruf(float ukuran, FontStyle gaya = FontStyle.Regular) =>
-        new Font("Segoe UI", ukuran, gaya);
+        keluargaNadi != null ? new Font(keluargaNadi, ukuran, gaya) : new Font("Segoe UI", ukuran, gaya);
 
     // Ikon NADI ikut tertanam di NADI.exe (ApplicationIcon). Dibaca dari berkas exe itu
     // agar jendela memakai ikon yang sama dengan taskbar; null bila gagal dibaca
