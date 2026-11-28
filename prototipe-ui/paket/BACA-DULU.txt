@@ -11,6 +11,9 @@ KEBUTUHAN
     berjalan, tetapi data dan riwayat chat hilang saat aplikasi ditutup.
 
 LANGKAH CEPAT
+  Bila paket ini sudah berisi appsettings.local.json, aplikasi sudah tersambung
+  ke database server (cloud). Lewati langkah 1 dan langsung ke langkah 2.
+
   1. (Sekali saja, bila memakai PostgreSQL) klik ganda: siapkan-database.bat
      Isi password PostgreSQL Anda. Skrip membuat database + tabel dan menulis
      appsettings.local.json otomatis.
