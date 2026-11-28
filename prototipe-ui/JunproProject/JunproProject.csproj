@@ -20,6 +20,13 @@
     <PackageReference Include="Npgsql" Version="10.0.3" />
   </ItemGroup>
 
+  <!-- Font Plus Jakarta Sans (SIL OFL 1.1, lihat Resources/Font/OFL.txt) ditanam di NADI.exe
+       agar tampilan sama di komputer yang belum memasangnya (PRD §13). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Font\PlusJakartaSans-Regular.ttf" LogicalName="font-regular" />
+    <EmbeddedResource Include="Resources\Font\PlusJakartaSans-Bold.ttf" LogicalName="font-bold" />
+  </ItemGroup>
+
   <!-- Connection string PostgreSQL dibaca dari appsettings.local.json di root
        repo (tidak di-commit, PRD §11.5); disalin ke folder output bila ada.
        Hanya untuk build Debug: paket Release tidak boleh membawa rahasia lokal

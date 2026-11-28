@@ -42,40 +42,58 @@ public sealed class ChatForm : FormDasar
 
         kolom.Controls.Add(BuatLabel("Tanya jawab seputar iklim wilayah yang sedang dibuka", 11, false, Tema.Teks));
 
+        if (!StatusAplikasi.Asisten.MemakaiAi)
+            kolom.Controls.Add(BuatBannerDemo());
+
+        FlowLayoutPanel kartuChat = BuatKotak();
+        kartuChat.Padding = new Padding(1);
+        kartuChat.Margin = new Padding(0, 10, 0, 0);
+        kolom.Controls.Add(kartuChat);
+        const int lebarDalam = LebarKonten - 2;
+
         // --- Header konteks ---
         Panel header = new Panel
         {
-            Size = new Size(LebarKonten, 52),
+            Size = new Size(lebarDalam, 66),
             BackColor = Tema.Putih,
-            Margin = new Padding(0, 14, 0, 8)
+            Margin = new Padding(0)
         };
-        BeriBingkai(header, Tema.Teal);
+        header.Paint += (s, e) =>
+        {
+            using Pen pen = new Pen(Tema.Garis);
+            e.Graphics.DrawLine(pen, 0, header.Height - 1, header.Width, header.Height - 1);
+        };
 
+        header.Controls.Add(new Label { Text = "\uE707", Font = Tema.Ikon(11), ForeColor = Tema.Navy, AutoSize = true, Location = new Point(16, 14) });
         Label konteks = BuatLabel($"Konteks: {profil.Wilayah.Kota}, {profil.Periode}", 11, true);
-        konteks.Location = new Point(18, 14);
+        konteks.Location = new Point(36, 10);
+        Label asistenAktif = BuatCatatan("Asisten aktif: " + StatusAplikasi.Asisten.Nama, LebarKonten - 200);
+        asistenAktif.Location = new Point(36, 36);
+        header.Controls.Add(asistenAktif);
 
-        btnHapus = BuatTombolSekunder("Hapus Riwayat", 130, 32);
-        btnHapus.Location = new Point(LebarKonten - 130 - 10, 10);
+        btnHapus = BuatTombolBahaya("Hapus Riwayat", 130, 34);
+        ((TombolNadi)btnHapus).Ikon = "\uE74D";
+        btnHapus.AutoSize = false;
+        btnHapus.Size = new Size(150, 34);
+        btnHapus.Location = new Point(lebarDalam - 150 - 14, 16);
         btnHapus.Click += (s, e) => HapusRiwayat(profil.Wilayah);
 
         header.Controls.Add(konteks);
         header.Controls.Add(btnHapus);
-        kolom.Controls.Add(header);
-
-        kolom.Controls.Add(BuatBannerDemo());
+        kartuChat.Controls.Add(header);
 
         // --- Area percakapan ---
         areaChat = new FlowLayoutPanel
         {
-            Size = new Size(LebarKonten, 330),
+            Size = new Size(lebarDalam, 320),
             AutoScroll = true,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
-            BackColor = Tema.Putih,
-            Padding = new Padding(12, 12, 12, 4),
-            Margin = new Padding(0, 0, 0, 10)
+            BackColor = LatarChat,
+            Padding = new Padding(14, 14, 14, 4),
+            Margin = new Padding(0)
         };
-        kolom.Controls.Add(areaChat);
+        kartuChat.Controls.Add(areaChat);
         TampilkanRiwayat(profil.Wilayah);
 
         // --- Pertanyaan saran ---
@@ -84,18 +102,20 @@ public sealed class ChatForm : FormDasar
 
         foreach (string pertanyaan in pertanyaanSaran)
         {
-            Button b = BuatTombolSekunder(pertanyaan, 60, 32);
-            b.AutoSize = true;
-            b.Font = Tema.Huruf(9.5f);
+            Button b = new TombolNadi(JenisTombol.Chip) { Text = pertanyaan, Size = new Size(60, 30), AutoSize = true };
+            b.Font = Tema.Huruf(8.5f, FontStyle.Bold);
+            b.Padding = new Padding(6, 0, 6, 0);
             b.Click += (s, e) => Kirim(pertanyaan);
             tombolSaran.Add(b);
         }
-        kolom.Controls.Add(BuatBaris(0, new Control[] { lblSaran }.Concat(tombolSaran).ToArray()));
+        FlowLayoutPanel barisSaran = BuatBaris(0, new Control[] { lblSaran }.Concat(tombolSaran).ToArray());
+        barisSaran.Margin = new Padding(16, 10, 0, 0);
+        kartuChat.Controls.Add(barisSaran);
 
         // --- Input pesan ---
         txtPesan = new TextBox
         {
-            Width = 520,
+            Width = lebarDalam - 32 - 140 - 64 - 30,
             MaxLength = BatasKarakter,
             Font = Tema.Huruf(11),
             PlaceholderText = $"Tulis pertanyaan tentang iklim {profil.Wilayah.Kota}…",
@@ -109,13 +129,19 @@ public sealed class ChatForm : FormDasar
             Kirim(txtPesan.Text);
         };
 
-        btnKirim = BuatTombol("Kirim", 100, 32);
+        btnKirim = BuatTombolIkon("Kirim", "\uE72A", JenisTombol.Utama);
         btnKirim.Click += (s, e) => Kirim(txtPesan.Text);
 
         lblHitung = BuatLabel("", 9, false, Tema.TeksRedup);
-        lblHitung.Margin = new Padding(0, 9, 0, 0);
+        lblHitung.AutoSize = false;
+        lblHitung.Size = new Size(54, 18);
+        lblHitung.TextAlign = ContentAlignment.MiddleRight;
 
-        kolom.Controls.Add(BuatBaris(12, txtPesan, btnKirim, lblHitung));
+        btnKirim.AutoSize = false;
+        btnKirim.Size = new Size(110, 38);
+        FlowLayoutPanel barisInput = BuatBaris(0, BuatKotakIsian(txtPesan, null, null, lblHitung), btnKirim);
+        barisInput.Margin = new Padding(16, 10, 0, 14);
+        kartuChat.Controls.Add(barisInput);
         PerbaruiStatusInput();
     }
 
@@ -137,8 +163,10 @@ public sealed class ChatForm : FormDasar
             TambahGelembung(pesan.Isi, pesan.DariPengguna);
 
         if (permintaan?.Wilayah == wilayah)
-            barisMengetik = TambahGelembung("NADI sedang mengetik…", false);
+            barisMengetik = TambahGelembung("•  •  •    Asisten sedang mengetik…", false);
     }
+
+    private static readonly Color LatarChat = Color.FromArgb(248, 250, 250);
 
     private Control TambahGelembung(string isi, bool dariPengguna)
     {
@@ -149,13 +177,15 @@ public sealed class ChatForm : FormDasar
         {
             AutoSize = true,
             MaximumSize = new Size(480, 0),
-            Padding = new Padding(12, 8, 12, 8),
+            Padding = new Padding(14, 10, 14, 10),
             Margin = new Padding(0),
             Font = Tema.Huruf(10),
-            BackColor = dariPengguna ? Tema.TealTeks : Tema.GelembungAi,
-            ForeColor = dariPengguna ? Tema.Putih : Tema.Teks,
+            BackColor = dariPengguna ? Tema.Aksen : Tema.Putih,
+            ForeColor = dariPengguna ? Tema.Navy : Tema.Teks,
+            UseMnemonic = false,
             Text = isi
         };
+        BeriBingkai(gelembung, dariPengguna ? Tema.Aksen : null, 12);
 
         // Pesan pengguna rata kanan, jawaban NADI rata kiri.
         FlowLayoutPanel baris = new FlowLayoutPanel
@@ -166,9 +196,11 @@ public sealed class ChatForm : FormDasar
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
             MinimumSize = new Size(lebarBaris, 0),
             MaximumSize = new Size(lebarBaris, 0),
-            Margin = new Padding(0, 0, 0, 8),
-            BackColor = Tema.Putih
+            Margin = new Padding(0, 0, 0, 10),
+            BackColor = LatarChat
         };
+        if (!dariPengguna)
+            baris.Controls.Add(new ChipIkon(ChipIkon.Kilau, Tema.TealMuda, Tema.TealTeks, 28) { Margin = new Padding(0, 2, 10, 0) });
         baris.Controls.Add(gelembung);
 
         area.Controls.Add(baris);
@@ -194,7 +226,7 @@ public sealed class ChatForm : FormDasar
 
         TambahGelembung(teks, true);
         permintaan = (wilayah, teks);
-        barisMengetik = TambahGelembung("NADI sedang mengetik…", false);
+        barisMengetik = TambahGelembung("•  •  •    Asisten sedang mengetik…", false);
 
         if (txtPesan != null) txtPesan.Text = "";
         PerbaruiStatusInput();
@@ -225,7 +257,8 @@ public sealed class ChatForm : FormDasar
     {
         if (permintaan != null || StatusAplikasi.RiwayatChat(wilayah).Count == 0) return;
 
-        if (!DialogNadi.Konfirmasi(this, $"Hapus seluruh riwayat chat untuk {wilayah.Kota}?", "Hapus Riwayat"))
+        if (!DialogNadi.Konfirmasi(this, $"Hapus seluruh riwayat chat untuk {wilayah.Kota}?", "Hapus Riwayat",
+                $"Semua percakapan untuk wilayah {wilayah.Kota} akan dihapus dan tidak bisa dikembalikan."))
             return;
 
         StatusAplikasi.HapusRiwayatChat(wilayah);

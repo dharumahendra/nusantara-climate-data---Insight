@@ -32,9 +32,10 @@ public sealed class PerbandinganForm : FormDasar
         Wilayah b = wilayahB ??= DataIklim.SemuaWilayah.First(w => w.Provinsi != a.Provinsi);
 
         // --- Filter ---
-        ComboBox cmbA = BuatCombo(200);
-        ComboBox cmbB = BuatCombo(200);
-        ComboBox cmbIndikator = BuatCombo(150);
+        ComboBox cmbA = BuatCombo(178);
+        ComboBox cmbB = BuatCombo(178);
+        ComboBox cmbIndikator = BuatCombo(112);
+        cmbA.Font = cmbB.Font = cmbIndikator.Font = Tema.Huruf(9);
         cmbA.DropDownWidth = cmbB.DropDownWidth = 280;
 
         cmbA.Items.AddRange(DataIklim.SemuaWilayah);
@@ -46,11 +47,12 @@ public sealed class PerbandinganForm : FormDasar
         cmbB.SelectedItem = b;
         cmbIndikator.SelectedIndex = Array.IndexOf(pilihanIndikator, indikator);
 
-        Button bandingkan = BuatTombol("Bandingkan", 120, 32);
+        Button bandingkan = BuatTombolIkon("Bandingkan", "\uE8AB", JenisTombol.Utama);
         bandingkan.Margin = new Padding(0, 22, 0, 0);
 
-        Label peringatan = BuatLabel(
-            "Pilih dua wilayah yang berbeda untuk dibandingkan.", 9.5f, true, Tema.OranyeTua);
+        Control peringatan = BuatStatus(
+            "Wilayah A dan Wilayah B sama. Pilih dua wilayah yang berbeda untuk dibandingkan — " +
+            "tombol Bandingkan aktif kembali setelahnya.", 'p', LebarKonten);
         peringatan.Visible = false;
 
         // Wilayah A = B tidak bisa dibandingkan (AC-03.3).
@@ -78,11 +80,13 @@ public sealed class PerbandinganForm : FormDasar
             WrapContents = false,
             Margin = new Padding(0, 16, 0, 8)
         };
-        filter.Controls.Add(BuatGrupField("Wilayah A", cmbA));
-        filter.Controls.Add(BuatGrupField("Wilayah B", cmbB));
+        filter.Controls.Add(BuatGrupField("Wilayah A", cmbA, Tema.Oranye));
+        filter.Controls.Add(BuatGrupField("Wilayah B", cmbB, Tema.HijauGrafik));
         filter.Controls.Add(BuatGrupField("Indikator", cmbIndikator));
         filter.Controls.Add(bandingkan);
-        kolom.Controls.Add(filter);
+        FlowLayoutPanel kartuFilter = BuatKotak();
+        kartuFilter.Controls.Add(filter);
+        kolom.Controls.Add(kartuFilter);
         kolom.Controls.Add(peringatan);
 
         // --- Hasil ---
@@ -109,34 +113,37 @@ public sealed class PerbandinganForm : FormDasar
             $"Periode {pa.Periode} — hanya tahun yang valid di kedua wilayah ({tahunSama.Length} tahun). " +
             "Sumber: ERA5 via Open-Meteo."));
 
-        GrafikGarisPanel grafik = new GrafikGarisPanel(
+        const int lebarKiri = 430;
+        FlowLayoutPanel kiri = BuatPanel(Format.NamaIndikator(ind) + " tahunan", null, lebarKiri);
+        kiri.Controls.Add(new GrafikGarisPanel(
             pa.Tahun,
             new[]
             {
-                new SeriGrafik(a.Kota, pa.Nilai(ind), Tema.Teal, Baseline: pa.Baseline(ind)),
-                new SeriGrafik(b.Kota, pb.Nilai(ind), Tema.Oranye, PutusPutus: true, Baseline: pb.Baseline(ind)),
+                new SeriGrafik(a.Kota, pa.Nilai(ind), Tema.Oranye, Baseline: pa.Baseline(ind)),
+                new SeriGrafik(b.Kota, pb.Nilai(ind), Tema.HijauGrafik, PutusPutus: true, Baseline: pb.Baseline(ind)),
             },
             v => Format.Nilai(ind, v),
             v => Format.Perubahan(ind, v),
             Format.PolaSumbu(ind),
             tampilkanTren: false)
         {
-            Size = new Size(LebarKonten, 280),
-            Margin = new Padding(0, 6, 0, 4)
-        };
-        kolom.Controls.Add(grafik);
-        kolom.Controls.Add(BuatCatatan(
-            "Garis dibedakan warna dan gaya (utuh vs putus-putus) agar tetap terbaca oleh pengguna buta warna."));
+            Size = new Size(lebarKiri - 36, 260),
+            Margin = new Padding(0, 0, 0, 6)
+        });
+        kiri.Controls.Add(BuatCatatan(
+            "Garis dibedakan warna dan gaya (utuh vs putus-putus) agar tetap terbaca oleh pengguna buta warna.", lebarKiri - 40));
 
-        kolom.Controls.Add(BuatJudulBagian("Tabel Perbandingan"));
-        kolom.Controls.Add(BuatTabel(pa, pb));
-        kolom.Controls.Add(BuatCatatan("▲ menandai nilai yang lebih tinggi pada baris tersebut."));
+        int lebarKanan = LebarKonten - lebarKiri - 14;
+        FlowLayoutPanel kanan = BuatPanel("Tabel Perbandingan", null, lebarKanan);
+        kanan.Controls.Add(BuatTabel(pa, pb, lebarKanan - 34));
+        kanan.Controls.Add(BuatCatatan("▲ menandai nilai yang lebih tinggi pada baris tersebut.", lebarKanan - 36));
+        kolom.Controls.Add(BuatDuaKolom(kiri, kanan));
 
-        Button dashboard = BuatTombolSekunder("Kembali ke Dashboard", 200, 40);
+        Button dashboard = BuatTombolIkon("Kembali ke Dashboard", "\uE128");
         dashboard.Click += (s, e) => Pindah<DashboardForm>();
-        Button insight = BuatTombol("Lihat Climate Insight", 200, 40);
+        Button insight = BuatTombolGelap("Lihat Climate Insight", "\uE9D2");
         insight.Click += (s, e) => Pindah<InsightForm>();
-        kolom.Controls.Add(BuatBaris(18, insight, dashboard));
+        kolom.Controls.Add(BuatBaris(4, insight, dashboard));
     }
 
     // Belum diminta / sedang diunduh / gagal: ketiganya ditangani tanpa memblokir form (PRD §13).
@@ -144,12 +151,9 @@ public sealed class PerbandinganForm : FormDasar
     {
         if (sedangMemuat)
         {
-            FlowLayoutPanel kotak = BuatKotak();
-            kotak.Padding = new Padding(26, 22, 26, 22);
-            kotak.Controls.Add(BuatLabel("Memuat data kedua wilayah…", 14, true));
-            lblProgres = BuatParagraf(teksProgres, LebarKonten - 60);
-            kotak.Controls.Add(lblProgres);
-            kolom.Controls.Add(kotak);
+            kolom.Controls.Add(BuatKeadaanMemuat("Memuat data kedua wilayah…", teksProgres,
+                "Data wilayah yang belum pernah dibuka diunduh lebih dulu dari Open-Meteo.", out Label progres));
+            lblProgres = progres;
         }
         else if (pesanGalat != null)
         {
@@ -204,7 +208,7 @@ public sealed class PerbandinganForm : FormDasar
         if (!IsDisposed) BangunUlang();
     }
 
-    private static Control BuatTabel(ProfilIklim a, ProfilIklim b)
+    private static Control BuatTabel(ProfilIklim a, ProfilIklim b, int lebar)
     {
         HasilTren suhuA = a.Tren(Indikator.SuhuRataRata), suhuB = b.Tren(Indikator.SuhuRataRata);
         HasilTren panasA = a.Tren(Indikator.HariPanas), panasB = b.Tren(Indikator.HariPanas);
@@ -225,19 +229,20 @@ public sealed class PerbandinganForm : FormDasar
                 panasA.PerubahanTotal, panasB.PerubahanTotal, true),
         };
 
-        const int tinggiBaris = 38;
+        const int tinggiBaris = 40;
         TableLayoutPanel tabel = new TableLayoutPanel
         {
             ColumnCount = 3,
             RowCount = baris.Length + 1,
-            Size = new Size(LebarKonten, tinggiBaris * (baris.Length + 1) + 2),
+            Size = new Size(lebar, tinggiBaris * (baris.Length + 1) + 2),
             BackColor = Tema.Garis,
             Padding = new Padding(1),
             Margin = new Padding(0, 4, 0, 6)
         };
-        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 278));
-        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220));
-        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220));
+        int kolomNilai = (lebar - 2) * 31 / 100;
+        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, lebar - 2 - kolomNilai * 2));
+        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, kolomNilai));
+        tabel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, kolomNilai));
         for (int r = 0; r <= baris.Length; r++)
             tabel.RowStyles.Add(new RowStyle(SizeType.Absolute, tinggiBaris));
 
@@ -257,8 +262,8 @@ public sealed class PerbandinganForm : FormDasar
             Color latar = i % 2 == 0 ? Tema.Putih : Tema.Latar;
 
             tabel.Controls.Add(Sel(nama, false, latar), 0, i + 1);
-            tabel.Controls.Add(Sel(teksA + (aLebih ? "  ▲" : ""), aLebih, latar), 1, i + 1);
-            tabel.Controls.Add(Sel(teksB + (bLebih ? "  ▲" : ""), bLebih, latar), 2, i + 1);
+            tabel.Controls.Add(Sel(teksA + (aLebih ? " ▲" : ""), aLebih, latar), 1, i + 1);
+            tabel.Controls.Add(Sel(teksB + (bLebih ? " ▲" : ""), bLebih, latar), 2, i + 1);
         }
 
         return tabel;
@@ -271,9 +276,9 @@ public sealed class PerbandinganForm : FormDasar
             Text = teks,
             Dock = DockStyle.Fill,
             Margin = new Padding(0),
-            Padding = new Padding(14, 0, 8, 0),
+            Padding = new Padding(6, 0, 2, 0),
             TextAlign = ContentAlignment.MiddleLeft,
-            Font = Tema.Huruf(10, tebal ? FontStyle.Bold : FontStyle.Regular),
+            Font = Tema.Huruf(8.5f, tebal ? FontStyle.Bold : FontStyle.Regular),
             ForeColor = tebal ? Tema.Navy : Tema.Teks,
             BackColor = latar
         };

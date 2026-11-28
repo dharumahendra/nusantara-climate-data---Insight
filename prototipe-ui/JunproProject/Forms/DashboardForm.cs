@@ -32,19 +32,16 @@ public sealed class DashboardForm : FormDasar
 
         kolom.Controls.Add(BuatLabel("Dashboard Explore", 24, true));
         kolom.Controls.Add(BuatLabel("Ringkasan kondisi iklim Indonesia", 11, false, Tema.Teks));
-        kolom.Controls.Add(BuatFilter());
+        FlowLayoutPanel kartuFilter = BuatKotak();
+        kartuFilter.Controls.Add(BuatFilter());
+        kolom.Controls.Add(kartuFilter);
 
         if (sedangMemuat)
         {
-            FlowLayoutPanel kotak = BuatKotak();
-            kotak.Padding = new Padding(26, 22, 26, 22);
-            kotak.Controls.Add(BuatLabel("Memuat data iklim…", 14, true));
-            lblProgres = BuatParagraf(teksProgres, LebarKonten - 60);
-            kotak.Controls.Add(lblProgres);
-            kotak.Controls.Add(BuatCatatan(
+            kolom.Controls.Add(BuatKeadaanMemuat("Memuat data iklim…", teksProgres,
                 "Unduhan pertama untuk satu wilayah memerlukan beberapa detik. Setelah itu datanya " +
-                "tersimpan dan bisa dibuka lagi tanpa internet.", LebarKonten - 60));
-            kolom.Controls.Add(kotak);
+                "tersimpan dan bisa dibuka lagi tanpa internet.", out Label progres));
+            lblProgres = progres;
             return;
         }
 
@@ -91,47 +88,56 @@ public sealed class DashboardForm : FormDasar
                 : trenSuhu.BelumJelas ? "tren belum jelas" : "tren " + profil.Periode));
         kolom.Controls.Add(kartu);
 
-        // --- Grafik batang perubahan suhu ---
+        // --- Grafik titik perubahan suhu (kiri) + ringkasan dan pintasan (kanan) ---
+        const int lebarKiri = 470;
+        FlowLayoutPanel kiri = BuatPanel(profil.TrenTersedia ? "Perubahan Suhu Sejak " + profil.TahunAwal : "Perubahan Suhu",
+            null, lebarKiri);
         if (profil.TrenTersedia)
         {
-            kolom.Controls.Add(BuatJudulBagian("Perubahan Suhu Sejak " + profil.TahunAwal));
-
             int[] tahunGrafik = PilihTahun(profil.Tahun, JumlahBatang);
             double awal = trenSuhu.NilaiPada(profil.TahunAwal);
-            GrafikBatangPanel grafik = new GrafikBatangPanel(
+            kiri.Controls.Add(new GrafikBatangPanel(
                 tahunGrafik.Select(t => t.ToString()).ToArray(),
                 tahunGrafik.Select(t => trenSuhu.NilaiPada(t) - awal).ToArray(),
                 Tema.Teal, Tema.Navy,
                 v => (v < 0 ? "−" : "+") + Format.Angka(Math.Abs(v), "0.0") + "°")
             {
-                Size = new Size(LebarKonten, 190),
-                Margin = new Padding(0, 4, 0, 6)
-            };
-            kolom.Controls.Add(grafik);
-            kolom.Controls.Add(BuatCatatan(
-                $"Nilai dibaca dari garis tren suhu rata-rata tahunan, relatif terhadap tahun {profil.TahunAwal}."));
+                Size = new Size(lebarKiri - 36, 230),
+                Margin = new Padding(0, 0, 0, 6)
+            });
+            kiri.Controls.Add(BuatCatatan(
+                $"Nilai dibaca dari garis tren suhu rata-rata tahunan, relatif terhadap tahun {profil.TahunAwal}.", lebarKiri - 40));
         }
         else
         {
-            kolom.Controls.Add(BuatCatatan(
+            kiri.Controls.Add(BuatCatatan(
                 $"Data belum cukup untuk analisis tren: hanya {profil.Tahun.Length} dari " +
-                $"{profil.JumlahTahunPeriode} tahun yang valid (minimal {ProfilIklim.MinTahunUntukTren})."));
+                $"{profil.JumlahTahunPeriode} tahun yang valid (minimal {ProfilIklim.MinTahunUntukTren}).", lebarKiri - 40));
         }
 
-        // --- Ringkasan ---
-        kolom.Controls.Add(BuatJudulBagian("Ringkasan Kondisi Iklim"));
-        kolom.Controls.Add(BuatParagraf(Narasi.RingkasanDashboard(profil)));
+        int lebarKanan = LebarKonten - lebarKiri - 14;
+        FlowLayoutPanel kanan = BuatPanel("Ringkasan Kondisi Iklim", null, lebarKanan, Tema.TealMuda, Color.FromArgb(196, 230, 232));
+        kanan.Controls.Add(BuatParagraf(Narasi.RingkasanDashboard(profil), lebarKanan - 36));
+        Label lanjut = BuatLabel("LANJUTKAN", 8, true, Tema.TeksRedup);
+        lanjut.Margin = new Padding(0, 12, 0, 6);
+        kanan.Controls.Add(lanjut);
 
-        Button insight = BuatTombol("Buka Climate Insight", 200, 42);
-        insight.Click += (s, e) => Pindah<InsightForm>();
-
-        Button aksi = BuatTombolSekunder("Lihat Aksi Iklim", 170, 42);
-        aksi.Click += (s, e) => Pindah<AksiForm>();
-
-        Button banding = BuatTombolSekunder("Bandingkan Wilayah", 180, 42);
-        banding.Click += (s, e) => Pindah<PerbandinganForm>();
-
-        kolom.Controls.Add(BuatBaris(14, insight, aksi, banding));
+        (string Teks, string Ikon, JenisTombol Jenis, Action Aksi)[] pintasan =
+        {
+            ("Buka Climate Insight", "\uE9D2", JenisTombol.Utama, () => Pindah<InsightForm>()),
+            ("Lihat Aksi Iklim", "\uEA80", JenisTombol.Sekunder, () => Pindah<AksiForm>()),
+            ("Bandingkan Wilayah", "\uE8AB", JenisTombol.Sekunder, () => Pindah<PerbandinganForm>()),
+        };
+        foreach (var (teks, ikon, jenis, aksiPintas) in pintasan)
+        {
+            Button b = BuatTombolIkon(teks, ikon, jenis);
+            b.AutoSize = false;
+            b.Size = new Size(lebarKanan - 36, 40);
+            b.Margin = new Padding(0, 0, 0, 8);
+            b.Click += (s, e) => aksiPintas();
+            kanan.Controls.Add(b);
+        }
+        kolom.Controls.Add(BuatDuaKolom(kiri, kanan));
     }
 
     // Memilih beberapa tahun yang tersebar merata, termasuk tahun pertama dan terakhir.
