@@ -2,31 +2,66 @@ using System.Globalization;
 
 namespace Junpro_Project;
 
-// Palet warna dari desain praktik (Form1), dipusatkan di sini supaya semua
-// form memakai warna yang sama.
+// Palet warna desain NADI (export.zip): latar abu kehijauan, sidebar putih,
+// aksen teal muda dengan teks gelap. Nama lama dipertahankan agar semua form tetap jalan.
 public static class Tema
 {
-    public static readonly Color Navy = Color.FromArgb(20, 45, 78);
-    public static readonly Color NavAktif = Color.FromArgb(35, 70, 115);
-    public static readonly Color Teal = Color.FromArgb(15, 157, 138);
+    public static readonly Color Navy = Color.FromArgb(24, 39, 42);          // tinta judul
+    public static readonly Color NavAktif = Color.FromArgb(153, 216, 219);   // menu aktif
+    public static readonly Color Aksen = Color.FromArgb(153, 216, 219);      // tombol utama
+    public static readonly Color AksenHover = Color.FromArgb(128, 203, 207);
+    public static readonly Color AksenTekan = Color.FromArgb(110, 192, 197);
 
-    // Teal gelap untuk komponen yang memuat teks. Teal asli (3,4:1 terhadap putih) tidak
-    // memenuhi kontras teks 4,5:1 (PRD §12); varian ini 5,5:1 di putih dan 4,9:1 di latar hover.
-    public static readonly Color TealTeks = Color.FromArgb(10, 118, 103);
-    public static readonly Color TealTeksHover = Color.FromArgb(8, 100, 88);
-    public static readonly Color TealMuda = Color.FromArgb(226, 244, 241);
-    public static readonly Color Latar = Color.FromArgb(244, 247, 250);
+    // Teal untuk garis grafik (>= 3:1 terhadap putih) dan teks teal (>= 4,5:1).
+    public static readonly Color Teal = Color.FromArgb(24, 150, 156);
+    public static readonly Color TealTeks = Color.FromArgb(13, 110, 115);
+    public static readonly Color TealTeksHover = Color.FromArgb(10, 92, 96);
+    public static readonly Color TealMuda = Color.FromArgb(230, 246, 247);
+    public static readonly Color Latar = Color.FromArgb(242, 245, 245);
     public static readonly Color Putih = Color.White;
-    public static readonly Color Teks = Color.FromArgb(45, 55, 72);
-    public static readonly Color TeksRedup = Color.FromArgb(100, 112, 130);
-    public static readonly Color Garis = Color.FromArgb(220, 226, 234);
-    public static readonly Color Oranye = Color.FromArgb(214, 122, 32);
-    public static readonly Color KuningMuda = Color.FromArgb(255, 247, 230);
-    public static readonly Color GelembungAi = Color.FromArgb(232, 239, 247);
+    public static readonly Color Teks = Color.FromArgb(62, 82, 86);
+    public static readonly Color TeksRedup = Color.FromArgb(86, 106, 110);
+    public static readonly Color Garis = Color.FromArgb(220, 229, 230);
+    public static readonly Color Oranye = Color.FromArgb(232, 93, 4);
+    public static readonly Color OranyeTerang = Color.FromArgb(252, 107, 5);
+    public static readonly Color Kuning = Color.FromArgb(255, 182, 43);
+    public static readonly Color KuningMuda = Color.FromArgb(255, 246, 224);
+    public static readonly Color KuningGaris = Color.FromArgb(255, 223, 158);
+    public static readonly Color GelembungAi = Color.FromArgb(236, 244, 245);
+    public static readonly Color Hijau = Color.FromArgb(92, 168, 40);
+    public static readonly Color HijauGrafik = Color.FromArgb(70, 140, 30);   // >= 3:1 di putih
+    public static readonly Color HijauMuda = Color.FromArgb(238, 247, 227);
+    public static readonly Color Merah = Color.FromArgb(180, 35, 24);
+    public static readonly Color MerahMuda = Color.FromArgb(255, 240, 238);
+    public static readonly Color MerahGaris = Color.FromArgb(247, 190, 182);
+    public static readonly Color Nonaktif = Color.FromArgb(206, 230, 232);
 
     // Versi gelap untuk teks status, agar kontrasnya cukup di latar terang.
-    public static readonly Color OranyeTua = Color.FromArgb(166, 84, 12);
-    public static readonly Color HijauTua = Color.FromArgb(25, 118, 80);
+    public static readonly Color OranyeTua = Color.FromArgb(166, 72, 0);
+    public static readonly Color HijauTua = Color.FromArgb(63, 110, 20);
+
+    // Ikon memakai font simbol bawaan Windows 10/11, tanpa berkas gambar tambahan.
+    public static Font Ikon(float ukuran) => new Font("Segoe MDL2 Assets", ukuran);
+
+    public static System.Drawing.Drawing2D.GraphicsPath Bulat(RectangleF r, float jari)
+    {
+        float d = Math.Min(jari * 2, Math.Min(r.Width, r.Height));
+        var p = new System.Drawing.Drawing2D.GraphicsPath();
+        p.AddArc(r.X, r.Y, d, d, 180, 90);
+        p.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+        p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+        p.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+        p.CloseFigure();
+        return p;
+    }
+
+    // Warna latar induk, untuk mengisi sudut di luar bentuk bulat.
+    public static Color LatarInduk(Control c)
+    {
+        for (Control? p = c.Parent; p != null; p = p.Parent)
+            if (p.BackColor.A == 255) return p.BackColor;
+        return Latar;
+    }
 
     public static Font Huruf(float ukuran, FontStyle gaya = FontStyle.Regular) =>
         new Font("Segoe UI", ukuran, gaya);

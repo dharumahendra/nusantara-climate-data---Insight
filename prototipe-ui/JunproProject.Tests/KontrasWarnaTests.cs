@@ -35,12 +35,14 @@ public class KontrasWarnaTests
         new object[] { "judul di latar halaman", Tema.Navy, Tema.Latar },
         new object[] { "teks redup di latar halaman", Tema.TeksRedup, Tema.Latar },
         new object[] { "teks redup di kartu putih", Tema.TeksRedup, Tema.Putih },
-        new object[] { "teks tombol utama", Tema.Putih, Tema.TealTeks },
-        new object[] { "teks tombol utama saat hover", Tema.Putih, Tema.TealTeksHover },
-        new object[] { "teks tombol sekunder", Tema.TealTeks, Tema.Putih },
-        new object[] { "teks tombol sekunder saat hover", Tema.TealTeks, Tema.TealMuda },
-        new object[] { "teks sidebar", Tema.Putih, Tema.Navy },
-        new object[] { "teks menu aktif", Tema.Putih, Tema.NavAktif },
+        new object[] { "teks tombol utama", Tema.Navy, Tema.Aksen },
+        new object[] { "teks tombol utama saat hover", Tema.Navy, Tema.AksenHover },
+        new object[] { "teks tombol sekunder", Tema.Navy, Tema.Putih },
+        new object[] { "teks tombol sekunder saat hover", Tema.Navy, Tema.TealMuda },
+        new object[] { "teks sidebar", Tema.Teks, Tema.Putih },
+        new object[] { "teks menu aktif", Tema.Navy, Tema.NavAktif },
+        new object[] { "teks tombol bahaya", Tema.Merah, Tema.MerahMuda },
+        new object[] { "teks tahap aktif", Tema.TealTeks, Tema.TealMuda },
         new object[] { "teks banner peringatan", Tema.Teks, Tema.KuningMuda },
         new object[] { "status peringatan", Tema.OranyeTua, Tema.Latar },
         new object[] { "status sukses", Tema.HijauTua, Tema.Latar },
@@ -60,9 +62,15 @@ public class KontrasWarnaTests
     [Theory]
     [InlineData("garis grafik utama")]
     [InlineData("garis tren")]
+    [InlineData("garis wilayah B")]
     public void GarisGrafik_MemenuhiKontrasElemenGrafis3(string nama)
     {
-        Color warna = nama == "garis tren" ? Tema.Oranye : Tema.Teal;
+        Color warna = nama switch
+        {
+            "garis tren" => Tema.Navy,
+            "garis wilayah B" => Tema.HijauGrafik,
+            _ => Tema.Oranye,
+        };
 
         Assert.True(Rasio(warna, Tema.Putih) >= 3.0, $"{nama}: kontras terhadap latar grafik kurang dari 3:1");
     }
