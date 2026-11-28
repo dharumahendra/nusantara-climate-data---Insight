@@ -51,7 +51,6 @@ public sealed class GrafikGarisPanel : Panel
         float X(int i) => area.Left + (n == 1 ? 0 : i * (float)area.Width / (n - 1));
         float Y(double v) => (float)(area.Bottom - (v - min) / (maks - min) * area.Height);
 
-        using Pen bingkai = new Pen(Tema.Garis);
         using Pen garisBantu = new Pen(Color.FromArgb(236, 240, 245));
         using Font fKecil = Tema.Huruf(8.5f);
         using Font fTebal = Tema.Huruf(8.5f, FontStyle.Bold);
@@ -60,7 +59,6 @@ public sealed class GrafikGarisPanel : Panel
         using StringFormat rataKanan = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
         using StringFormat tengah = new StringFormat { Alignment = StringAlignment.Center };
 
-        g.DrawRectangle(bingkai, 0, 0, Width - 1, Height - 1);
 
         // Garis bantu & label sumbu Y
         for (int k = 0; k <= JumlahGarisBantu; k++)
@@ -80,9 +78,18 @@ public sealed class GrafikGarisPanel : Panel
 
         if (tampilkanTren)
         {
-            using Pen penTren = new Pen(Tema.Oranye, 1.8f) { DashStyle = DashStyle.Dash };
+            using Pen penTren = new Pen(Tema.Navy, 1.8f) { DashStyle = DashStyle.Dash };
             foreach (HasilTren t in tren)
                 g.DrawLine(penTren, X(0), Y(t.NilaiPada(tahun[0])), X(n - 1), Y(t.NilaiPada(tahun[^1])));
+        }
+
+        if (seri.Length == 1 && seri[0].Nilai.Length > 1)
+        {
+            PointF[] garis = seri[0].Nilai.Select((v, i) => new PointF(X(i), Y(v))).ToArray();
+            PointF[] luas = garis.Append(new PointF(garis[^1].X, area.Bottom))
+                                 .Append(new PointF(garis[0].X, area.Bottom)).ToArray();
+            using SolidBrush brLuas = new SolidBrush(Color.FromArgb(26, seri[0].Warna));
+            g.FillPolygon(brLuas, luas);
         }
 
         foreach (SeriGrafik s in seri)
@@ -108,10 +115,22 @@ public sealed class GrafikGarisPanel : Panel
             if (yMaks < area.Top - 4) yMaks = Y(d[iMaks]) + 8;
             float yMin = Y(d[iMin]) + 8;
             if (yMin + 16 > area.Bottom) yMin = Y(d[iMin]) - 24;
-            float XLabel(int i) => Math.Clamp(X(i) - 40, area.Left, area.Right - 80);
-
-            g.DrawString("Tertinggi", fTebal, brTeks, new RectangleF(XLabel(iMaks), yMaks, 80, 16), tengah);
-            g.DrawString("Terendah", fTebal, brTeks, new RectangleF(XLabel(iMin), yMin, 80, 16), tengah);
+            void Pil(string teks, int i, float y, Color latar, Color garisPil, Color warnaTeks)
+            {
+                Size ukuran = TextRenderer.MeasureText(teks, fKecil);
+                float lebarPil = ukuran.Width + 10;
+                float xPil = Math.Clamp(X(i) - lebarPil / 2, area.Left, area.Right - lebarPil);
+                RectangleF kotakPil = new RectangleF(xPil, y - 1, lebarPil, 18);
+                using GraphicsPath jalur = Tema.Bulat(kotakPil, 6);
+                using (SolidBrush b = new SolidBrush(latar)) g.FillPath(b, jalur);
+                using (Pen pn = new Pen(garisPil)) g.DrawPath(pn, jalur);
+                TextRenderer.DrawText(g, teks, fKecil, Rectangle.Round(kotakPil), warnaTeks,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+            }
+            Pil($"Tertinggi · {tahun[iMaks]} · {formatNilai(d[iMaks])}", iMaks, yMaks,
+                Tema.KuningMuda, Tema.KuningGaris, Tema.OranyeTua);
+            Pil($"Terendah · {tahun[iMin]} · {formatNilai(d[iMin])}", iMin, yMin,
+                Tema.Putih, Tema.Garis, Tema.Navy);
         }
 
         GambarLegenda(g, fKecil, brTeks);
@@ -155,7 +174,7 @@ public sealed class GrafikGarisPanel : Panel
         }
 
         foreach (SeriGrafik s in seri) Item(s.Nama, s.Warna, s.PutusPutus, 2.2f);
-        if (tampilkanTren) Item("Garis tren", Tema.Oranye, true, 1.8f);
+        if (tampilkanTren) Item("Garis tren", Tema.Navy, true, 1.8f);
     }
 
     private void GambarTooltip(Graphics g, Rectangle area, float x, Font font, Font fTebal, Brush brTeks)
@@ -178,16 +197,16 @@ public sealed class GrafikGarisPanel : Panel
         float kotakX = x + 10 + lebar > area.Right ? x - 10 - lebar : x + 10;
         RectangleF kotak = new RectangleF(kotakX, area.Top + 6, lebar, tinggi);
 
-        using (SolidBrush brLatar = new SolidBrush(Color.White))
-        using (Pen penKotak = new Pen(Tema.Garis))
-        {
-            g.FillRectangle(brLatar, kotak);
-            g.DrawRectangle(penKotak, kotak.X, kotak.Y, kotak.Width, kotak.Height);
-        }
+        using (GraphicsPath jalur = Tema.Bulat(kotak, 8))
+        using (SolidBrush brLatar = new SolidBrush(Tema.Navy))
+            g.FillPath(brLatar, jalur);
 
-        g.DrawString(judul, fTebal, brTeks, kotak.X + 8, kotak.Y + 4);
+        using SolidBrush brPutih = new SolidBrush(Color.White);
+        using SolidBrush brAnomali = new SolidBrush(Tema.Kuning);
+        g.DrawString(judul, fTebal, brPutih, kotak.X + 8, kotak.Y + 4);
         for (int i = 0; i < baris.Count; i++)
-            g.DrawString(baris[i], font, brTeks, kotak.X + 8, kotak.Y + 20 + i * 16);
+            g.DrawString(baris[i], font, baris[i].TrimStart().StartsWith("Anomali") ? brAnomali : brPutih,
+                kotak.X + 8, kotak.Y + 20 + i * 16);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
