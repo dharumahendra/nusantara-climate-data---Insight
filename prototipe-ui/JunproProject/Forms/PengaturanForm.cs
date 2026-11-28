@@ -21,19 +21,27 @@ public sealed class PengaturanForm : FormDasar
         kolom.Controls.Add(BuatLabel("Pengaturan", 24, true));
         kolom.Controls.Add(BuatLabel("Atur koneksi AI dan lihat informasi aplikasi", 11, false, Tema.Teks));
 
+        const int lebarKiri = 470;
+        int lebarKanan = LebarKonten - lebarKiri - 14;
+        int isiKiri = lebarKiri - 36, isiKanan = lebarKanan - 36;
+        FlowLayoutPanel kiri = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true };
+        FlowLayoutPanel kanan = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true };
+
         // --- API key ---
-        kolom.Controls.Add(BuatJudulBagian("API Key Google Gemini"));
-        kolom.Controls.Add(BuatParagraf(
+        FlowLayoutPanel api = BuatPanel("API Key Google Gemini", "\uE8D7", lebarKiri);
+        api.Margin = new Padding(0, 0, 0, 14);
+        api.Controls.Add(BuatParagraf(
             "API key dibutuhkan untuk fitur Penjelasan AI dan Chat AI. " +
-            "Tanpa API key, semua fitur lain tetap berjalan normal."));
+            "Tanpa API key, semua fitur lain tetap berjalan normal.", isiKiri));
 
         TextBox txtKey = new TextBox
         {
-            Width = 440,
+            Width = isiKiri - 130,
             Font = Tema.Huruf(11),
             UseSystemPasswordChar = true,
             Text = StatusAplikasi.ApiKey,
             PlaceholderText = "Tempel API key dari Google AI Studio",
+            BackColor = Tema.Latar,
             Margin = new Padding(0, 8, 0, 0)
         };
         CheckBox chkTampil = new CheckBox
@@ -44,16 +52,16 @@ public sealed class PengaturanForm : FormDasar
             Margin = new Padding(0, 12, 0, 0)
         };
         chkTampil.CheckedChanged += (s, e) => txtKey.UseSystemPasswordChar = !chkTampil.Checked;
-        kolom.Controls.Add(BuatBaris(0, txtKey, chkTampil));
+        api.Controls.Add(BuatBaris(0, BuatKotakIsian(txtKey), chkTampil));
 
-        Label lblStatus = BuatLabel(
-            StatusAplikasi.AiAktif
+        Label lblStatus = BuatLabel("", 9.5f, false, Tema.TeksRedup, isiKiri);
+        lblStatus.Margin = new Padding(0, 10, 0, 6);
+        AturStatus(lblStatus, StatusAplikasi.AiAktif
                 ? "API key tersimpan untuk sesi ini."
                 : "Belum ada API key — fitur AI berjalan dalam mode demo.",
-            10, true, Tema.TeksRedup, LebarKonten);
-        lblStatus.Margin = new Padding(0, 12, 0, 6);
+            StatusAplikasi.AiAktif ? Tema.HijauTua : Tema.TeksRedup);
 
-        Button simpan = BuatTombol("Simpan", 120, 38);
+        Button simpan = BuatTombolIkon("Simpan", "\uE74E", JenisTombol.Utama);
         simpan.Click += (s, e) =>
         {
             StatusAplikasi.SimpanApiKey(txtKey.Text);
@@ -62,7 +70,7 @@ public sealed class PengaturanForm : FormDasar
                 : "API key dikosongkan. Fitur AI kembali ke mode demo.", Tema.HijauTua);
         };
 
-        Button uji = BuatTombolSekunder("Uji Koneksi", 140, 38);
+        Button uji = BuatTombolIkon("Uji Koneksi", "\uE895");
         uji.Click += async (s, e) =>
         {
             uji.Enabled = false;   // cegah klik ganda selama permintaan berjalan (PRD §11.6)
@@ -70,61 +78,74 @@ public sealed class PengaturanForm : FormDasar
             uji.Enabled = true;
         };
 
-        kolom.Controls.Add(BuatBaris(12, simpan, uji));
-        kolom.Controls.Add(lblStatus);
-        kolom.Controls.Add(BuatCatatan(
+        api.Controls.Add(BuatBaris(10, simpan, uji));
+        api.Controls.Add(lblStatus);
+        api.Controls.Add(BuatCatatan(
             "API key yang diketik di sini hanya disimpan di memori (field private AsistenGemini) selama aplikasi " +
             "terbuka dan tidak pernah ditulis ke log. Agar tidak perlu mengetik ulang, isi Gemini:ApiKey di " +
-            "appsettings.local.json (file ini tidak ikut di-commit)."));
+            "appsettings.local.json (file ini tidak ikut di-commit).", isiKiri));
+        kiri.Controls.Add(api);
 
         // --- Database ---
-        kolom.Controls.Add(BuatJudulBagian("Database PostgreSQL"));
-        kolom.Controls.Add(BuatParagraf(
+        FlowLayoutPanel db = BuatPanel("Database PostgreSQL", "\uE8F1", lebarKiri);
+        db.Margin = new Padding(0, 0, 0, 14);
+        db.Controls.Add(BuatParagraf(
             "Daftar wilayah dan riwayat chat disimpan di PostgreSQL. Connection string diatur di " +
-            "appsettings.local.json (ConnectionStrings:Nadi) dan dibaca saat aplikasi dibuka."));
+            "appsettings.local.json (ConnectionStrings:Nadi) dan dibaca saat aplikasi dibuka.", isiKiri));
 
-        Label lblDatabase = BuatLabel(StatusAplikasi.KeteranganDatabase, 10, true,
-            StatusAplikasi.Database == null ? Tema.OranyeTua : Tema.HijauTua, LebarKonten);
-        lblDatabase.Margin = new Padding(0, 12, 0, 6);
+        Label lblDatabase = BuatLabel("", 9.5f, false, Tema.TeksRedup, isiKiri);
+        lblDatabase.Margin = new Padding(0, 10, 0, 6);
+        AturStatus(lblDatabase, StatusAplikasi.KeteranganDatabase,
+            StatusAplikasi.Database == null ? Tema.OranyeTua : Tema.HijauTua);
 
-        Button ujiDatabase = BuatTombolSekunder("Uji Koneksi Database", 200, 38);
+        Button ujiDatabase = BuatTombolIkon("Uji Koneksi Database", "\uE895");
         ujiDatabase.Click += (s, e) => UjiKoneksiDatabase(lblDatabase);
 
-        kolom.Controls.Add(BuatBaris(8, ujiDatabase));
-        kolom.Controls.Add(lblDatabase);
+        db.Controls.Add(BuatBaris(8, ujiDatabase));
+        db.Controls.Add(lblDatabase);
+        kiri.Controls.Add(db);
 
         // --- Data & riwayat ---
-        kolom.Controls.Add(BuatJudulBagian("Data & Riwayat"));
+        FlowLayoutPanel data = BuatPanel("Data & Riwayat", "\uE81C", lebarKiri);
         Wilayah? wilayah = StatusAplikasi.WilayahAktif;
-        kolom.Controls.Add(BuatParagraf(wilayah == null
+        data.Controls.Add(BuatParagraf(wilayah == null
             ? "Belum ada wilayah yang dipilih."
-            : $"Wilayah aktif: {wilayah.NamaLengkap}."));
+            : $"Wilayah aktif: {wilayah.NamaLengkap}.", isiKiri));
 
-        Button ganti = BuatTombolSekunder("Ganti Wilayah", 150, 38);
+        Button ganti = BuatTombolIkon("Ganti Wilayah", "\uE707");
         ganti.Click += (s, e) => Pindah<DashboardForm>();
 
-        Button hapusChat = BuatTombolSekunder("Hapus Semua Riwayat Chat", 230, 38);
+        Button hapusChat = BuatTombolBahaya("Hapus Semua Riwayat Chat", 230, 38);
+        ((TombolNadi)hapusChat).Ikon = "\uE74D";
         hapusChat.Click += (s, e) =>
         {
-            if (!DialogNadi.Konfirmasi(this, "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat"))
+            if (!DialogNadi.Konfirmasi(this, "Hapus riwayat chat untuk semua wilayah?", "Hapus Riwayat",
+                    "Semua percakapan di semua wilayah akan dihapus dan tidak bisa dikembalikan."))
                 return;
 
             StatusAplikasi.HapusSemuaRiwayatChat();
             DialogNadi.Info(this, "Riwayat chat telah dihapus.", "Informasi NADI");
         };
-        kolom.Controls.Add(BuatBaris(8, ganti, hapusChat));
+        data.Controls.Add(BuatBaris(8, ganti, hapusChat));
+        data.Controls.Add(BuatCatatan("Menghapus semua riwayat chat tidak bisa dibatalkan.", isiKiri));
+        kiri.Controls.Add(data);
 
-        // --- Tentang ---
-        kolom.Controls.Add(BuatJudulBagian("Tentang NADI"));
-        kolom.Controls.Add(BuatParagraf(
+        // --- Tentang + Disclaimer (kanan) ---
+        FlowLayoutPanel tentang = BuatPanel("Tentang NADI", "\uE946", lebarKanan);
+        tentang.Margin = new Padding(0, 0, 0, 14);
+        tentang.Controls.Add(BuatParagraf(
             "NADI (Nusantara Climate Data & Insight) membantu membaca data iklim historis Indonesia, " +
-            "memahami artinya, dan memulai aksi iklim. Data iklim diambil dari Open-Meteo (reanalisis ERA5) untuk 30 tahun kalender penuh terakhir, dengan baseline normal 1991–2020."));
+            "memahami artinya, dan memulai aksi iklim. Data iklim diambil dari Open-Meteo (reanalisis ERA5) untuk 30 tahun kalender penuh terakhir, dengan baseline normal 1991–2020.", isiKanan));
+        tentang.Controls.Add(BuatCatatan("Versi 1.0.0 · Windows", isiKanan));
+        kanan.Controls.Add(tentang);
 
-        FlowLayoutPanel kotakDisclaimer = BuatKotak(Tema.Oranye, Tema.KuningMuda);
-        kotakDisclaimer.Margin = new Padding(0, 10, 0, 0);
-        kotakDisclaimer.Controls.Add(BuatLabel("Disclaimer", 10.5f, true));
-        kotakDisclaimer.Controls.Add(BuatParagraf(Disclaimer, LebarKonten - 50));
-        kolom.Controls.Add(kotakDisclaimer);
+        FlowLayoutPanel disclaimer = BuatPanel("Disclaimer", "\uE7BA", lebarKanan, Tema.KuningMuda, Tema.KuningGaris);
+        Label teksDisclaimer = BuatParagraf(Disclaimer, isiKanan);
+        teksDisclaimer.ForeColor = Color.FromArgb(107, 69, 0);
+        disclaimer.Controls.Add(teksDisclaimer);
+        kanan.Controls.Add(disclaimer);
+
+        kolom.Controls.Add(BuatDuaKolom(kiri, kanan));
     }
 
     // Memeriksa bentuk API key, lalu mengirim satu permintaan kecil ke Gemini.
@@ -163,9 +184,14 @@ public sealed class PengaturanForm : FormDasar
         }
     }
 
+    // Status tampil sebagai kotak berwarna: hijau = berhasil, merah = gagal/peringatan.
     private static void AturStatus(Label lbl, string teks, Color warna)
     {
         lbl.Text = teks;
-        lbl.ForeColor = warna;
+        lbl.ForeColor = warna == Tema.OranyeTua ? Tema.Merah : warna;
+        lbl.BackColor = warna == Tema.HijauTua ? Tema.HijauMuda
+            : warna == Tema.OranyeTua ? Tema.MerahMuda
+            : Color.Transparent;
+        lbl.Padding = lbl.BackColor == Color.Transparent ? new Padding(0) : new Padding(10, 7, 10, 7);
     }
 }
