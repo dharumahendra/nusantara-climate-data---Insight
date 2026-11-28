@@ -9,11 +9,17 @@
 
 .EXAMPLE
     .\prototipe-ui\buat-paket.ps1
+
+.EXAMPLE
+    .\prototipe-ui\buat-paket.ps1 -KonfigDemo konfigurasi-demo\appsettings.local.json
+    Menyertakan konfigurasi demo (database cloud, user terbatas) sebagai
+    appsettings.local.json di paket, agar NADI.exe langsung tersambung.
 #>
 [CmdletBinding()]
 param(
     [string]$Versi = "1.0.0",
-    [string]$Keluaran = "dist"
+    [string]$Keluaran = "dist",
+    [string]$KonfigDemo
 )
 
 $ErrorActionPreference = "Stop"
@@ -56,6 +62,19 @@ Write-Host "[3/4] Memeriksa paket tidak membawa rahasia lokal..." -ForegroundCol
 $rahasia = Get-ChildItem $folderPaket -Recurse -Filter "appsettings.local.json" -ErrorAction SilentlyContinue
 if ($rahasia) { $rahasia | Remove-Item -Force; Write-Warning "appsettings.local.json ditemukan di paket dan dihapus." }
 Get-ChildItem $folderPaket -Recurse -Include *.pdb | Remove-Item -Force
+
+# Konfigurasi demo disalin SETELAH pemeriksaan di atas, karena memang sengaja dibawa.
+if ($KonfigDemo) {
+    $sumberKonfig = if ([IO.Path]::IsPathRooted($KonfigDemo)) { $KonfigDemo } else { Join-Path $root $KonfigDemo }
+    if (-not (Test-Path $sumberKonfig)) { throw "Konfigurasi demo tidak ditemukan: $sumberKonfig" }
+    try { $isiKonfig = Get-Content $sumberKonfig -Raw | ConvertFrom-Json } catch { throw "Konfigurasi demo bukan JSON valid: $sumberKonfig" }
+    if (-not $isiKonfig.ConnectionStrings.Nadi) { throw "Konfigurasi demo tidak berisi ConnectionStrings.Nadi." }
+    if ($isiKonfig.ConnectionStrings.Nadi -match 'Host=(localhost|127\.0\.0\.1)') {
+        throw "Konfigurasi demo masih mengarah ke database lokal."
+    }
+    Copy-Item $sumberKonfig (Join-Path $folderPaket "appsettings.local.json")
+    Write-Host "      Konfigurasi demo disertakan sebagai appsettings.local.json." -ForegroundColor Yellow
+}
 
 Write-Host "[4/4] Membuat zip..." -ForegroundColor Cyan
 Compress-Archive -Path (Join-Path $folderPaket "*") -DestinationPath $zip -CompressionLevel Optimal

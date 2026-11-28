@@ -1,6 +1,6 @@
 # Progress Pengerjaan NADI
 
-**Terakhir diperbarui:** 2026-11-25
+**Terakhir diperbarui:** 2026-11-28
 
 Dokumen ini mencatat progres pengerjaan proyek secara ringkas. Untuk detail scope, rumus, dan acceptance criteria, lihat [`docs/PRD.md`](docs/PRD.md). Cara memakai aplikasi ada di [`docs/PANDUAN.md`](docs/PANDUAN.md).
 
@@ -34,7 +34,7 @@ Aplikasi yang berjalan berada di [`prototipe-ui/`](prototipe-ui/). Folder `src/`
 
 | Pekerjaan | Status | Catatan |
 |---|---|---|
-| Database bukan lokal (cloud) | 🔲 Belum | Syarat pengumpulan akhir. Saat ini aplikasi memakai PostgreSQL di komputer pengguna. |
+| Database bukan lokal (cloud) | ✅ Selesai | PostgreSQL 18 di AWS RDS dengan user terbatas `nadi_app`. Paket dibuat dengan `buat-paket.ps1 -KonfigDemo`. |
 | Slide presentasi (PPT) | 🔲 Belum | Maksimal 10 menit. |
 | Video demo | 🔲 Belum | Maksimal 3 menit, hanya demo aplikasi. |
 | ERD dan Use Case Diagram sebagai gambar | 🔲 Belum | ERD baru berupa kode Mermaid di PRD §9. Class diagram sudah ada di README. |
