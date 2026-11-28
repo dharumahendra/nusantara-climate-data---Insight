@@ -1,0 +1,72 @@
+% Use Case Diagram aplikasi NADI
+% Kompilasi: pdflatex use-case.tex
+\documentclass[border=12pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\begin{document}
+\begin{tikzpicture}[
+    uc/.style={draw, thick, ellipse, align=center, font=\small,
+               minimum width=4.4cm, minimum height=1.25cm, inner sep=1pt, fill=white},
+    garis/.style={thick},
+    relasi/.style={thick, dashed, -{Straight Barb[length=6pt]}},
+    stereotip/.style={font=\footnotesize, fill=white, inner sep=1pt}
+  ]
+
+  % Aktor berupa orang-orangan
+  \newcommand{\aktor}[4]{%
+    \begin{scope}[shift={(#2)}, thick]
+      \draw (0,0.75) circle (0.25);
+      \draw (0,0.5) -- (0,-0.3);
+      \draw (-0.45,0.25) -- (0.45,0.25);
+      \draw (0,-0.3) -- (-0.35,-0.9);
+      \draw (0,-0.3) -- (0.35,-0.9);
+      \node[align=center, font=\small, below] at (0,-0.95) {#3};
+      \coordinate (#1) at (#4);
+    \end{scope}}
+
+  % Batas sistem
+  \draw[thick] (2.6,0.9) rectangle (15.0,16.5);
+  \node[font=\bfseries, anchor=north] at (8.8,16.4) {Aplikasi NADI};
+
+  % Use case utama (kolom kiri)
+  \node[uc] (pilih)   at (5.4,15.0) {Memilih wilayah};
+  \node[uc] (data)    at (5.4,12.8) {Menampilkan data\\iklim wilayah};
+  \node[uc] (insight) at (5.4,10.6) {Melihat tren historis\\(Climate Insight)};
+  \node[uc] (banding) at (5.4,8.6)  {Membandingkan\\dua wilayah};
+  \node[uc] (chat)    at (5.4,6.6)  {Bertanya di\\Chat AI};
+  \node[uc] (aksi)    at (5.4,4.4)  {Melihat rekomendasi\\aksi iklim};
+  \node[uc] (atur)    at (5.4,2.2)  {Mengatur koneksi\\dan API key};
+
+  % Use case pendukung (kolom kanan)
+  \node[uc] (unduh)   at (12.0,12.8) {Mengunduh data\\Open-Meteo};
+  \node[uc] (jelas)   at (12.0,10.6) {Membaca penjelasan AI};
+  \node[uc] (hapus)   at (12.0,5.0)  {Menghapus\\riwayat chat};
+  \node[uc] (uji)     at (12.0,2.2)  {Menguji koneksi\\database / Gemini};
+
+  % Aktor
+  \aktor{pengguna}{0,8.6}{Pengguna}{0.5,0.1};
+  \aktor{openmeteo}{17.6,12.8}{Open-Meteo\\API}{-0.5,0.1};
+  \aktor{gemini}{17.6,8.0}{Google\\Gemini API}{-0.5,0.1};
+
+  % Asosiasi pengguna
+  \foreach \u in {pilih,data,insight,banding,chat,aksi,atur}
+    \draw[garis] (pengguna) -- (\u.west);
+
+  % Asosiasi sistem eksternal
+  \draw[garis] (unduh.east) -- (openmeteo);
+  \draw[garis] (jelas.east) -- (gemini);
+  \draw[garis] (chat) -- (gemini);
+
+  % include / extend
+  \draw[relasi] (data) -- node[stereotip, above=2pt] {\guillemotleft include\guillemotright} (unduh);
+  \draw[relasi] (insight) -- node[stereotip, above=2pt] {\guillemotleft include\guillemotright} (jelas);
+  \draw[relasi] (hapus) -- node[stereotip, sloped, below=2pt] {\guillemotleft extend\guillemotright} (chat);
+  \draw[relasi] (uji) -- node[stereotip, above=2pt] {\guillemotleft extend\guillemotright} (atur);
+
+\end{tikzpicture}
+\end{document}
